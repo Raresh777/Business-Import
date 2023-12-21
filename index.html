@@ -77,44 +77,44 @@
         });
 
         function correctAddresses(data) {
-            return data.map((row, index) => {
-                if (index === 0) {
-                    return ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
-                }
-
-                const directoryLink = row[3]; // Column D
-                const businessName = row[7]; // Column H
-                const category1 = 'Shop Local'; 
-                const subCategory1 = 'Essential Business';
-                const about = row[11]; // Column L
-                const fullAddress = row[12]; // Column M
-                let [address, city, state, zip] = ['', '', '', ''];
-                let addressLine2 = '';
-                if(fullAddress) {
-                    let parts = fullAddress.split(',');
-                    address = parts[0].trim();
-                    if (parts.length > 3) {
-                        addressLine2 = parts[1].trim();
-                        city = parts[2].trim();
-                    } else if (parts.length > 2) {
-                        city = parts[1].trim();
-                    }
-                    state = parts[parts.length - 2].trim();
-                    zip = parts[parts.length - 1].trim();
-                }
-                let phone = row[6].replace(/[\s-]/g, ''); // Column G
-                const country = 'US';
-                const email = row[9]; // Column J
-                const website = '';
-                const instagram = '';
-                const facebook = '';
-                const twitter = '';
-                const youtube = '';
-
-                return [directoryLink, businessName, category1, subCategory1, about, address, addressLine2, city, state, zip, phone, country, email, website, instagram, facebook, twitter, youtube];
-            });
+    return data.map((row, index) => {
+        if (index === 0) {
+            // Headers for the corrected CSV
+            return ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
         }
 
+        // Extracting and formatting data from the original CSV
+        const directoryLink = row[3]; // Column D
+        const businessName = row[7]; // Column H
+        const about = row[11]; // Column L
+        const fullAddress = row[12]; // Column M
+        let [address, addressLine2, city, state, zip] = ['', '', '', '', ''];
+
+        if (fullAddress) {
+            let parts = fullAddress.split(',');
+            address = parts[0].trim();
+            city = (parts.length > 2) ? parts[1].trim() : '';
+            state = (parts.length > 2) ? parts[parts.length - 2].trim() : '';
+            zip = (parts.length > 2) ? parts[parts.length - 1].trim() : '';
+            addressLine2 = (parts.length > 3) ? parts[1].trim() : '';
+        }
+
+        let phone = row[6].replace(/[\s-]/g, ''); // Column G
+        const email = row[9]; // Column J
+
+        // Setting static values for some columns
+        const category1 = 'Shop Local';
+        const subCategory1 = 'Essential Business';
+        const country = 'US';
+        const website = '';
+        const instagram = '';
+        const facebook = '';
+        const twitter = '';
+        const youtube = '';
+
+        return [directoryLink, businessName, category1, subCategory1, about, address, addressLine2, city, state, zip, phone, country, email, website, instagram, facebook, twitter, youtube];
+    });
+}
         function downloadCorrectedCSV(data) {
             var csv = Papa.unparse(data);
             var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
