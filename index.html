@@ -92,65 +92,56 @@
             }
         });
 
-        function correctAddresses(data) {
-    return data.map((row, index) => {
-        // Skip the header row and return the headers for the corrected CSV
-        if (index === 0) {
-            return ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
+       function correctAddresses(rows) {
+    // The first row is assumed to be blank or not needed since we are constructing a new header row
+    let correctedData = [];
+
+    // Define new headers for the corrected CSV
+    let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
+    correctedData.push(headers);
+
+    // Start processing from the first row since there are no headers
+    rows.forEach((row, index) => {
+        if (index === 0) return; // Skip the first row if it's blank or not needed
+
+        // Initialize an array to hold corrected row data
+        let correctedRow = new Array(headers.length).fill('');
+
+        // Process the full address from the assumed column index for 'M'
+        let fullAddress = row[12]; // Column M is at index 12
+        let addressComponents = fullAddress ? fullAddress.split(',') : [];
+
+        // Extract street address (Column F), which is typically the first component
+        correctedRow[5] = addressComponents[0] || ''; // Address
+
+        // Check for suite or office number and city (Column G and H)
+        if (addressComponents.length > 1) {
+            let suiteOrOfficeMatch = addressComponents[1].match(/(suite|office) \d+/i);
+            correctedRow[6] = suiteOrOfficeMatch ? suiteOrOfficeMatch[0] : ''; // Address line 2
+            correctedRow[7] = suiteOrOfficeMatch ? addressComponents[2] || '' : addressComponents[1] || ''; // City
         }
 
-        // Initialize corrected row with static and simple transformation values
-        let correctedRow = {
-            'Directory Link': row['D'] || '',
-            'Business Name': row['H'] || '',
-            'Category 1': 'Shop Local',
-            'Sub category 1': 'Essential Business',
-            'About': row['L'] || '',
-            'Country': 'US',
-            'Email': row['J'] || '',
-            'Website': '',
-            'Instagram username': '',
-            'Facebook username': '',
-            'Twitter username': '',
-            'YouTube video link': ''
-        };
-
-        // Handle the phone number formatting, removing any non-digit characters
-        correctedRow['Phone'] = (row['G'] || '').replace(/\D/g, '');
-
-        // Process the full address from column M, if it exists
-        if (row['M']) {
-            let fullAddressParts = row['M'].split(',').map(part => part.trim());
-
-            // Assign street address, which is typically the first part
-            correctedRow['Address'] = fullAddressParts[0] || '';
-
-            // Initialize variables for additional address components
-            let suiteOrOfficeIndex = -1;
-
-            // Identify suite or office number part and city
-            fullAddressParts.forEach((part, i) => {
-                if (part.toLowerCase().includes('suite') || part.toLowerCase().includes('office')) {
-                    suiteOrOfficeIndex = i;
-                }
-            });
-
-            // Assign suite or office number, city, state, and zip
-            correctedRow['Address line 2'] = suiteOrOfficeIndex !== -1 ? fullAddressParts[suiteOrOfficeIndex] : '';
-            correctedRow['City'] = suiteOrOfficeIndex !== -1 && fullAddressParts[suiteOrOfficeIndex + 1] ? fullAddressParts[suiteOrOfficeIndex + 1] : '';
-            correctedRow['State'] = fullAddressParts.length > 2 ? fullAddressParts[fullAddressParts.length - 2] : '';
-            correctedRow['Zip'] = fullAddressParts.length > 2 ? fullAddressParts[fullAddressParts.length - 1] : '';
-
-            // Remove any web links from the address fields
-            ['Address', 'Address line 2', 'City', 'State', 'Zip'].forEach(field => {
-                if (correctedRow[field] && correctedRow[field].match(/http[s]?:\/\//)) {
-                    correctedRow[field] = ''; // Clear the field if it contains a web link
-                }
-            });
+        // State and Zip (Column I and J)
+        if (addressComponents.length > 2) {
+            correctedRow[8] = addressComponents[addressComponents.length - 2] || ''; // State
+            correctedRow[9] = addressComponents[addressComponents.length - 1] || ''; // Zip
         }
 
-        return correctedRow;
+        // Populate other data from the assumed columns
+        correctedRow[0] = row[3] || ''; // Directory Link from Column D
+        correctedRow[1] = row[7] || ''; // Business Name from Column H
+        correctedRow[2] = 'Shop Local'; // Category 1
+        correctedRow[3] = 'Essential Business'; // Sub category 1
+        correctedRow[4] = row[11] || ''; // About from Column L
+        correctedRow[10] = (row[6] || '').replace(/\D/g, ''); // Phone from Column G, remove non-digits
+        correctedRow[11] = 'US'; // Country
+        correctedRow[12] = row[9] || ''; // Email from Column J
+
+        // Add corrected row to the data array
+        correctedData.push(correctedRow);
     });
+
+    return correctedData;
 }
         function downloadCorrectedCSV(data) {
             var csv = Papa.unparse(data);
