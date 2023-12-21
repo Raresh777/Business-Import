@@ -86,72 +86,60 @@
 
         function correctAddresses(data) {
     return data.map((row, index) => {
+        // Skip the header row and return the headers for the corrected CSV
         if (index === 0) {
-            // Skip the header row
-            return row;
+            return ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
         }
 
-        // Initialize the corrected address fields
-        let address = '';
-        let addressLine2 = '';
-        let city = '';
-        let state = '';
-        let zip = '';
-
-        // Process the full address from column M
-        const fullAddressParts = row['M'].split(',').map(part => part.trim());
-
-        // Detect and assign the street address, city, state, and zip
-        address = fullAddressParts[0]; // Street address is typically the first part
-        if (fullAddressParts.length > 1) {
-            // The last two parts are usually state and zip
-            state = fullAddressParts[fullAddressParts.length - 2];
-            zip = fullAddressParts[fullAddressParts.length - 1];
-
-            // Check if the second part is a suite/office number or a city
-            if (fullAddressParts[1].toLowerCase().includes('suite') || fullAddressParts[1].toLowerCase().includes('office')) {
-                addressLine2 = fullAddressParts[1];
-                // If there's an address line 2, the city would be in the third part
-                if (fullAddressParts.length > 2) {
-                    city = fullAddressParts[2];
-                }
-            } else {
-                // If no suite/office number, the second part is the city
-                city = fullAddressParts[1];
-            }
-        }
-
-        // Remove any web links from the address fields
-        [address, addressLine2, city, state, zip].forEach(field => {
-            if (field && field.match(/http[s]?:\/\//)) {
-                field = ''; // Clear the field if it contains a web link
-            }
-        });
-
-        // Format the phone number, removing any non-digit characters
-        const phone = row['G'].replace(/\D/g, '');
-
-        // Construct the corrected row with the processed data
+        // Initialize corrected row with static and simple transformation values
         let correctedRow = {
-            'Directory Link': row['D'],
-            'Business Name': row['H'],
+            'Directory Link': row['D'] || '',
+            'Business Name': row['H'] || '',
             'Category 1': 'Shop Local',
             'Sub category 1': 'Essential Business',
-            'About': row['L'],
-            'Address': address,
-            'Address line 2': addressLine2,
-            'City': city,
-            'State': state,
-            'Zip': zip,
-            'Phone': phone,
+            'About': row['L'] || '',
             'Country': 'US',
-            'Email': row['J'],
+            'Email': row['J'] || '',
             'Website': '',
             'Instagram username': '',
             'Facebook username': '',
             'Twitter username': '',
             'YouTube video link': ''
         };
+
+        // Handle the phone number formatting, removing any non-digit characters
+        correctedRow['Phone'] = (row['G'] || '').replace(/\D/g, '');
+
+        // Process the full address from column M, if it exists
+        if (row['M']) {
+            let fullAddressParts = row['M'].split(',').map(part => part.trim());
+
+            // Assign street address, which is typically the first part
+            correctedRow['Address'] = fullAddressParts[0] || '';
+
+            // Initialize variables for additional address components
+            let suiteOrOfficeIndex = -1;
+
+            // Identify suite or office number part and city
+            fullAddressParts.forEach((part, i) => {
+                if (part.toLowerCase().includes('suite') || part.toLowerCase().includes('office')) {
+                    suiteOrOfficeIndex = i;
+                }
+            });
+
+            // Assign suite or office number, city, state, and zip
+            correctedRow['Address line 2'] = suiteOrOfficeIndex !== -1 ? fullAddressParts[suiteOrOfficeIndex] : '';
+            correctedRow['City'] = suiteOrOfficeIndex !== -1 && fullAddressParts[suiteOrOfficeIndex + 1] ? fullAddressParts[suiteOrOfficeIndex + 1] : '';
+            correctedRow['State'] = fullAddressParts.length > 2 ? fullAddressParts[fullAddressParts.length - 2] : '';
+            correctedRow['Zip'] = fullAddressParts.length > 2 ? fullAddressParts[fullAddressParts.length - 1] : '';
+
+            // Remove any web links from the address fields
+            ['Address', 'Address line 2', 'City', 'State', 'Zip'].forEach(field => {
+                if (correctedRow[field] && correctedRow[field].match(/http[s]?:\/\//)) {
+                    correctedRow[field] = ''; // Clear the field if it contains a web link
+                }
+            });
+        }
 
         return correctedRow;
     });
