@@ -47,19 +47,24 @@
                     return ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
                 }
 
-                const businessName = row[7]; // Business Name from column H
-                const about = row[11]; // About from column L
-                const fullAddress = row[12]; // Full address from column M
-                let [street, addressLine2, city, state, zip] = fullAddress.split(',').map(part => part.trim());
+                const directoryLink = row[3]; // Website URL
+                const businessName = row[7]; // Business Name
+                const about = row[10]; // Description
+                let [address, addressLine2, city, state, zip] = row[12].split(',').map(part => part.trim());
+                let phone = row[6].replace(/[\s-]/g, '');
+                let email = row[9];
+                let country = 'US'; // Default or derived
 
-                // Formatting phone number (remove dashes and spaces)
-                let phone = row[5].replace(/[\s-]/g, '');
+                // Default values for categories and social media (you can modify these as needed)
+                const category1 = 'Category';
+                const subCategory1 = 'Subcategory';
+                const website = directoryLink; // Same as Directory Link
+                const instagram = '';
+                const facebook = '';
+                const twitter = '';
+                const youtube = '';
 
-                // Determine the country based on the address
-                let country = 'US'; // Default to 'US' or implement logic to determine based on address
-
-                // Reconstruct the row with the correct format
-                return [row[0], businessName, 'Shop Local', 'Essential Business', about, street, addressLine2, city, state, zip, phone, country, row[6], row[8], row[9], row[10], row[13], row[14]];
+                return [directoryLink, businessName, category1, subCategory1, about, address, addressLine2, city, state, zip, phone, country, email, website, instagram, facebook, twitter, youtube];
             });
         }
 
