@@ -3,60 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <title>CSV Address Formatter</title>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Address Formatter</title>
     <style>
-    body {
-        font-family: 'Arial', sans-serif;
-        margin: 0;
-        padding: 0;
-        background: url('your-futuristic-background-image.jpg') no-repeat center center fixed;
-        background-size: cover;
-        color: white;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .container {
-        background: rgba(0, 0, 0, 0.85);
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-        width: 50%;
-        min-width: 300px;
-    }
-    h1 {
-        text-align: center;
-        color: #fff;
-    }
-    input[type="file"] {
-        width: 100%;
-        padding: 10px;
-        margin-top: 20px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        cursor: pointer;
-    }
-    button {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        margin-top: 20px;
-        background: linear-gradient(45deg, #6e45e2, #88d3ce);
-        border: none;
-        border-radius: 5px;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-    }
-    button:hover, button:focus {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-</style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('URL_OF_YOUR_MECHANICAL_BACKGROUND_IMAGE') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.75);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            width: 40%;
+            min-width: 300px;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        input[type="file"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            border: 2px solid #555;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+        }
+        button {
+            display: block;
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 20px;
+            background: linear-gradient(45deg, #9c27b0, #ff9800);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            outline: none;
+        }
+        button:hover, button:focus {
+            background: linear-gradient(45deg, #ff9800, #9c27b0);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
