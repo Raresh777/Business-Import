@@ -92,20 +92,20 @@
 
         if (fullAddress) {
             let parts = fullAddress.split(',');
-            address = parts[0].trim();
-            city = (parts.length > 2) ? parts[1].trim() : '';
-            state = (parts.length > 2) ? parts[parts.length - 2].trim() : '';
-            zip = (parts.length > 2) ? parts[parts.length - 1].trim() : '';
-            addressLine2 = (parts.length > 3) ? parts[1].trim() : '';
+            address = parts[0].trim(); // Street name and number
+            city = (parts.length > 2) ? parts[1].trim() : ''; // City
+            state = (parts.length > 2) ? parts[parts.length - 2].trim() : ''; // State
+            zip = (parts.length > 2) ? parts[parts.length - 1].trim() : ''; // Zip code
+            addressLine2 = (parts.length > 3 && !parts[1].trim().match(/http[s]?:\/\//)) ? parts[1].trim() : ''; // Address line 2 (if existent and not a web link)
         }
 
-        let phone = row[6].replace(/[\s-]/g, ''); // Column G
-        const email = row[9]; // Column J
+        let phone = row[6].replace(/[\s-()]/g, ''); // Column G, formatted phone number
 
         // Setting static values for some columns
         const category1 = 'Shop Local';
         const subCategory1 = 'Essential Business';
         const country = 'US';
+        const email = row[9]; // Column J
         const website = '';
         const instagram = '';
         const facebook = '';
@@ -115,6 +115,7 @@
         return [directoryLink, businessName, category1, subCategory1, about, address, addressLine2, city, state, zip, phone, country, email, website, instagram, facebook, twitter, youtube];
     });
 }
+
         function downloadCorrectedCSV(data) {
             var csv = Papa.unparse(data);
             var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
