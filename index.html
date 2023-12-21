@@ -77,45 +77,73 @@
         });
 
         function correctAddresses(data) {
-    // Assuming data is an array of objects where each object is a row from the CSV
-    return data.map(row => {
-        // Initialize the object that will hold the corrected row data
-        let correctedRow = {};
+    return data.map((row, index) => {
+        if (index === 0) {
+            // Skip the header row
+            return row;
+        }
 
-        // Populate the corrected row with data from the "wrong" sheet
-        correctedRow['Directory Link'] = row['D']; // Assumes 'D' is the key for the Directory Link column in your data
-        correctedRow['Business Name'] = row['H']; // Assumes 'H' is the key for the Business Name column
-        correctedRow['Category 1'] = 'Shop Local';
-        correctedRow['Sub category 1'] = 'Essential Business';
-        correctedRow['About'] = row['L']; // Assumes 'L' is the key for the About column
-        correctedRow['Country'] = 'US';
-        correctedRow['Email'] = row['J']; // Assumes 'J' is the key for the Email column
+        // Initialize the corrected address fields
+        let address = '';
+        let addressLine2 = '';
+        let city = '';
+        let state = '';
+        let zip = '';
 
-        // Handle the address parsing
-        let fullAddress = row['M']; // Assumes 'M' is the key for the Address column
-        if (fullAddress) {
-            // Use a regular expression to detect and ignore web links
-            if (!fullAddress.match(/http[s]?:\/\//)) {
-                let addressParts = fullAddress.split(',');
-                correctedRow['Address'] = addressParts[0].trim();
-                correctedRow['City'] = addressParts.length > 2 ? addressParts[1].trim() : '';
-                correctedRow['State'] = addressParts.length > 2 ? addressParts[addressParts.length - 2].trim() : '';
-                correctedRow['Zip'] = addressParts.length > 2 ? addressParts[addressParts.length - 1].trim() : '';
-                // Address line 2 should contain suite or office number if existent
-                correctedRow['Address line 2'] = addressParts.length > 3 ? addressParts[1].trim() : '';
+        // Process the full address from column M
+        const fullAddressParts = row['M'].split(',').map(part => part.trim());
+
+        // Detect and assign the street address, city, state, and zip
+        address = fullAddressParts[0]; // Street address is typically the first part
+        if (fullAddressParts.length > 1) {
+            // The last two parts are usually state and zip
+            state = fullAddressParts[fullAddressParts.length - 2];
+            zip = fullAddressParts[fullAddressParts.length - 1];
+
+            // Check if the second part is a suite/office number or a city
+            if (fullAddressParts[1].toLowerCase().includes('suite') || fullAddressParts[1].toLowerCase().includes('office')) {
+                addressLine2 = fullAddressParts[1];
+                // If there's an address line 2, the city would be in the third part
+                if (fullAddressParts.length > 2) {
+                    city = fullAddressParts[2];
+                }
+            } else {
+                // If no suite/office number, the second part is the city
+                city = fullAddressParts[1];
             }
         }
 
-        // Handle the phone number formatting
-        let phone = row['G']; // Assumes 'G' is the key for the Phone column
-        correctedRow['Phone'] = phone.replace(/[\s-()]/g, '');
+        // Remove any web links from the address fields
+        [address, addressLine2, city, state, zip].forEach(field => {
+            if (field && field.match(/http[s]?:\/\//)) {
+                field = ''; // Clear the field if it contains a web link
+            }
+        });
 
-        // Leave social media fields blank
-        correctedRow['Website'] = '';
-        correctedRow['Instagram username'] = '';
-        correctedRow['Facebook username'] = '';
-        correctedRow['Twitter username'] = '';
-        correctedRow['YouTube video link'] = '';
+        // Format the phone number, removing any non-digit characters
+        const phone = row['G'].replace(/\D/g, '');
+
+        // Construct the corrected row with the processed data
+        let correctedRow = {
+            'Directory Link': row['D'],
+            'Business Name': row['H'],
+            'Category 1': 'Shop Local',
+            'Sub category 1': 'Essential Business',
+            'About': row['L'],
+            'Address': address,
+            'Address line 2': addressLine2,
+            'City': city,
+            'State': state,
+            'Zip': zip,
+            'Phone': phone,
+            'Country': 'US',
+            'Email': row['J'],
+            'Website': '',
+            'Instagram username': '',
+            'Facebook username': '',
+            'Twitter username': '',
+            'YouTube video link': ''
+        };
 
         return correctedRow;
     });
