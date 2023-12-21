@@ -77,45 +77,49 @@
         });
 
         function correctAddresses(data) {
-    return data.map((row, index) => {
-        if (index === 0) {
-            // Headers for the corrected CSV
-            return ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
-        }
+    // Assuming data is an array of objects where each object is a row from the CSV
+    return data.map(row => {
+        // Initialize the object that will hold the corrected row data
+        let correctedRow = {};
 
-        // Extracting and formatting data from the original CSV
-        const directoryLink = row[3]; // Column D
-        const businessName = row[7]; // Column H
-        const about = row[11]; // Column L
-        const fullAddress = row[12]; // Column M
-        let [address, addressLine2, city, state, zip] = ['', '', '', '', ''];
+        // Populate the corrected row with data from the "wrong" sheet
+        correctedRow['Directory Link'] = row['D']; // Assumes 'D' is the key for the Directory Link column in your data
+        correctedRow['Business Name'] = row['H']; // Assumes 'H' is the key for the Business Name column
+        correctedRow['Category 1'] = 'Shop Local';
+        correctedRow['Sub category 1'] = 'Essential Business';
+        correctedRow['About'] = row['L']; // Assumes 'L' is the key for the About column
+        correctedRow['Country'] = 'US';
+        correctedRow['Email'] = row['J']; // Assumes 'J' is the key for the Email column
 
+        // Handle the address parsing
+        let fullAddress = row['M']; // Assumes 'M' is the key for the Address column
         if (fullAddress) {
-            let parts = fullAddress.split(',');
-            address = parts[0].trim(); // Street name and number
-            city = (parts.length > 2) ? parts[1].trim() : ''; // City
-            state = (parts.length > 2) ? parts[parts.length - 2].trim() : ''; // State
-            zip = (parts.length > 2) ? parts[parts.length - 1].trim() : ''; // Zip code
-            addressLine2 = (parts.length > 3 && !parts[1].trim().match(/http[s]?:\/\//)) ? parts[1].trim() : ''; // Address line 2 (if existent and not a web link)
+            // Use a regular expression to detect and ignore web links
+            if (!fullAddress.match(/http[s]?:\/\//)) {
+                let addressParts = fullAddress.split(',');
+                correctedRow['Address'] = addressParts[0].trim();
+                correctedRow['City'] = addressParts.length > 2 ? addressParts[1].trim() : '';
+                correctedRow['State'] = addressParts.length > 2 ? addressParts[addressParts.length - 2].trim() : '';
+                correctedRow['Zip'] = addressParts.length > 2 ? addressParts[addressParts.length - 1].trim() : '';
+                // Address line 2 should contain suite or office number if existent
+                correctedRow['Address line 2'] = addressParts.length > 3 ? addressParts[1].trim() : '';
+            }
         }
 
-        let phone = row[6].replace(/[\s-()]/g, ''); // Column G, formatted phone number
+        // Handle the phone number formatting
+        let phone = row['G']; // Assumes 'G' is the key for the Phone column
+        correctedRow['Phone'] = phone.replace(/[\s-()]/g, '');
 
-        // Setting static values for some columns
-        const category1 = 'Shop Local';
-        const subCategory1 = 'Essential Business';
-        const country = 'US';
-        const email = row[9]; // Column J
-        const website = '';
-        const instagram = '';
-        const facebook = '';
-        const twitter = '';
-        const youtube = '';
+        // Leave social media fields blank
+        correctedRow['Website'] = '';
+        correctedRow['Instagram username'] = '';
+        correctedRow['Facebook username'] = '';
+        correctedRow['Twitter username'] = '';
+        correctedRow['YouTube video link'] = '';
 
-        return [directoryLink, businessName, category1, subCategory1, about, address, addressLine2, city, state, zip, phone, country, email, website, instagram, facebook, twitter, youtube];
+        return correctedRow;
     });
 }
-
         function downloadCorrectedCSV(data) {
             var csv = Papa.unparse(data);
             var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
