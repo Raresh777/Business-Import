@@ -101,6 +101,7 @@ h1 {
 </div>
 
    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
 <script>
     document.getElementById('processBtn').addEventListener('click', function() {
         var fileInput = document.getElementById('csvFile');
@@ -111,7 +112,7 @@ h1 {
                 complete: function(results) {
                     var data = results.data;
                     var correctedData = correctAddresses(data);
-                    downloadCorrectedCSV(correctedData);
+                    downloadCorrectedExcel(correctedData);
                 },
                 error: function(err) {
                     alert('Error reading CSV: ' + err.message);
@@ -122,69 +123,66 @@ h1 {
         }
     });
 
-       function correctAddresses(rows) {
-    // The first row is assumed to be blank or not needed since we are constructing a new header row
-    let correctedData = [];
+    function correctAddresses(rows) {
+        let correctedData = [];
 
-    // Define new headers for the corrected CSV
-    let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
-    correctedData.push(headers);
+        // Define new headers for the corrected CSV
+        let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
+        correctedData.push(headers);
 
-    // Start processing from the first row since there are no headers
-    rows.forEach((row, index) => {
-        if (index === 0) return; // Skip the first row if it's blank or not needed
+        // Start processing from the first row since there are no headers
+        rows.forEach((row, index) => {
+            if (index === 0) return; // Skip the first row if it's blank or not needed
 
-        // Initialize an array to hold corrected row data
-        let correctedRow = new Array(headers.length).fill('');
+            let correctedRow = new Array(headers.length).fill('');
 
-        // Process the full address from the assumed column index for 'M'
-        let fullAddress = row[12]; // Column M is at index 12
-        let addressComponents = fullAddress ? fullAddress.split(',') : [];
+            let fullAddress = row[12];
+            let addressComponents = fullAddress ? fullAddress.split(',') : [];
+            correctedRow[5] = addressComponents[0] || ''; // Address
 
-        // Extract street address (Column F), which is typically the first component
-        correctedRow[5] = addressComponents[0] || ''; // Address
+            if (addressComponents.length > 1) {
+                let suiteOrOfficeMatch = addressComponents[1].match(/(suite|office) \d+/i);
+                correctedRow[6] = suiteOrOfficeMatch ? suiteOrOfficeMatch[0] : ''; // Address line 2
+                correctedRow[7] = suiteOrOfficeMatch ? addressComponents[2] || '' : addressComponents[1] || ''; // City
+            }
 
-        // Check for suite or office number and city (Column G and H)
-        if (addressComponents.length > 1) {
-            let suiteOrOfficeMatch = addressComponents[1].match(/(suite|office) \d+/i);
-            correctedRow[6] = suiteOrOfficeMatch ? suiteOrOfficeMatch[0] : ''; // Address line 2
-            correctedRow[7] = suiteOrOfficeMatch ? addressComponents[2] || '' : addressComponents[1] || ''; // City
+            if (addressComponents.length > 2) {
+                correctedRow[8] = addressComponents[addressComponents.length - 2] || ''; // State
+                correctedRow[9] = addressComponents[addressComponents.length - 1] || ''; // Zip
+            }
+
+            correctedRow[0] = row[3] || ''; // Directory Link from Column D
+            correctedRow[1] = row[7] || ''; // Business Name from Column H
+            correctedRow[2] = 'Shop Local'; // Category 1
+            correctedRow[3] = 'Essential Business'; // Sub category 1
+            correctedRow[4] = row[11] || ''; // About from Column L
+            correctedRow[10] = (row[6] || '').replace(/\D/g, ''); // Phone from Column G, remove non-digits
+            correctedRow[11] = 'US'; // Country
+            correctedRow[12] = row[9] || ''; // Email from Column J
+
+            correctedData.push(correctedRow);
+        });
+
+        return correctedData;
+    }
+
+    function downloadCorrectedExcel(data) {
+        var wb = XLSX.utils.book_new();
+        var ws = XLSX.utils.aoa_to_sheet(data);
+
+        for(var C = 0; C != ws['!ref'].split(":")[1].charCodeAt(0) - 64; ++C) {
+            var cell_address = XLSX.utils.encode_cell({c:C, r:0}); 
+            if(!ws[cell_address]) continue;
+            ws[cell_address].s = {
+                font: {
+                    bold: true
+                }
+            };
         }
 
-        // State and Zip (Column I and J)
-        if (addressComponents.length > 2) {
-            correctedRow[8] = addressComponents[addressComponents.length - 2] || ''; // State
-            correctedRow[9] = addressComponents[addressComponents.length - 1] || ''; // Zip
-        }
-
-        // Populate other data from the assumed columns
-        correctedRow[0] = row[3] || ''; // Directory Link from Column D
-        correctedRow[1] = row[7] || ''; // Business Name from Column H
-        correctedRow[2] = 'Shop Local'; // Category 1
-        correctedRow[3] = 'Essential Business'; // Sub category 1
-        correctedRow[4] = row[11] || ''; // About from Column L
-        correctedRow[10] = (row[6] || '').replace(/\D/g, ''); // Phone from Column G, remove non-digits
-        correctedRow[11] = 'US'; // Country
-        correctedRow[12] = row[9] || ''; // Email from Column J
-
-        // Add corrected row to the data array
-        correctedData.push(correctedRow);
-    });
-
-    return correctedData;
-}
-        function downloadCorrectedCSV(data) {
-            var csv = Papa.unparse(data);
-            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            var link = document.createElement('a');
-            var url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'corrected_addresses.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    </script>
+        XLSX.utils.book_append_sheet(wb, ws, "ProcessedData");
+        XLSX.writeFile(wb, 'processed_data.xlsx');
+    }
+</script>
 </body>
 </html>
