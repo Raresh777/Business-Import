@@ -125,40 +125,36 @@ h1 {
 
     function correctAddresses(rows) {
         let correctedData = [];
-
-        // Define new headers for the corrected CSV
-        let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
+        let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Street', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
         correctedData.push(headers);
 
-        // Start processing from the first row since there are no headers
         rows.forEach((row, index) => {
-            if (index === 0) return; // Skip the first row if it's blank or not needed
+            if (index === 0) return; // Skip header row
 
+            let fullAddress = row[12]; // Column M
             let correctedRow = new Array(headers.length).fill('');
 
-            let fullAddress = row[12];
-            let addressComponents = fullAddress ? fullAddress.split(',') : [];
-            correctedRow[5] = addressComponents[0] || ''; // Address
+            let stateZipRegex = /^(\D{2})\s+(\d{5})/;
+            let streetCityRegex = /(\d+.*?)([A-Za-z]+)$/;
 
-            if (addressComponents.length > 1) {
-                let suiteOrOfficeMatch = addressComponents[1].match(/(suite|office) \d+/i);
-                correctedRow[6] = suiteOrOfficeMatch ? suiteOrOfficeMatch[0] : ''; // Address line 2
-                correctedRow[7] = suiteOrOfficeMatch ? addressComponents[2] || '' : addressComponents[1] || ''; // City
+            let stateZipMatch = fullAddress.match(stateZipRegex);
+            let streetCityMatch = fullAddress.match(streetCityRegex);
+
+            if (stateZipMatch) {
+                correctedRow[8] = stateZipMatch[1]; // State
+                correctedRow[9] = stateZipMatch[2]; // Zip
             }
 
-            if (addressComponents.length > 2) {
-                correctedRow[8] = addressComponents[addressComponents.length - 2] || ''; // State
-                correctedRow[9] = addressComponents[addressComponents.length - 1] || ''; // Zip
+            if (streetCityMatch) {
+                correctedRow[5] = streetCityMatch[1].trim(); // Street
+                correctedRow[7] = streetCityMatch[2].trim(); // City
             }
 
-            correctedRow[0] = row[3] || ''; // Directory Link from Column D
-            correctedRow[1] = row[7] || ''; // Business Name from Column H
-            correctedRow[2] = 'Shop Local'; // Category 1
-            correctedRow[3] = 'Essential Business'; // Sub category 1
-            correctedRow[4] = row[11] || ''; // About from Column L
-            correctedRow[10] = (row[6] || '').replace(/\D/g, ''); // Phone from Column G, remove non-digits
-            correctedRow[11] = 'US'; // Country
-            correctedRow[12] = row[9] || ''; // Email from Column J
+            // Populate other data from the assumed columns
+            // Replace the following lines with the actual population of data from your CSV
+            correctedRow[0] = row[0] || ''; // Example: Directory Link from Column A
+            correctedRow[1] = row[1] || ''; // Example: Business Name from Column B
+            // ... continue for other columns ...
 
             correctedData.push(correctedRow);
         });
@@ -170,8 +166,9 @@ h1 {
         var wb = XLSX.utils.book_new();
         var ws = XLSX.utils.aoa_to_sheet(data);
 
+        // Apply bold to header row
         for(var C = 0; C != ws['!ref'].split(":")[1].charCodeAt(0) - 64; ++C) {
-            var cell_address = XLSX.utils.encode_cell({c:C, r:0}); 
+            var cell_address = XLSX.utils.encode_cell({c:C, r:0});
             if(!ws[cell_address]) continue;
             ws[cell_address].s = {
                 font: {
