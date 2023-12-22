@@ -103,80 +103,69 @@ h1 {
    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
 <script>
-    document.getElementById('processBtn').addEventListener('click', function() {
-        var fileInput = document.getElementById('csvFile');
-        var file = fileInput.files[0];
+document.getElementById('processBtn').addEventListener('click', function() {
+    var fileInput = document.getElementById('csvFile');
+    var file = fileInput.files[0];
 
-        if (file) {
-            Papa.parse(file, {
-                complete: function(results) {
-                    var correctedData = correctAddresses(results.data);
-                    downloadCorrectedExcel(correctedData);
-                },
-                error: function(err) {
-                    alert('Error reading CSV: ' + err.message);
-                }
-            });
-        } else {
-            alert('Please select a CSV file to process.');
-        }
-    });
-
-    function correctAddresses(rows) {
-        let correctedData = [];
-        let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Street', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
-        correctedData.push(headers);
-
-        for (let i = 1; i < rows.length; i++) {
-            let row = rows[i];
-            let fullAddress = row[12] || ''; // Column M is at index 12
-            let correctedRow = new Array(headers.length).fill('');
-
-            // Regular expressions to extract different parts of the address
-            let stateZipRegex = /(\b[A-Z]{2}\b)\s*(\d{5})/;
-            let streetRegex = /(\d+\s[\w\s]+\b)(?=\s{2,}|\b[A-Z]{2}\b)/;
-            let cityRegex = /([a-zA-Z]+(?:\s[a-zA-Z]+)*)(?=\s{2,}\b[A-Z]{2}\b\s\d{5})/;
-
-            let streetMatch = fullAddress.match(streetRegex);
-            let cityMatch = fullAddress.match(cityRegex);
-            let stateZipMatch = fullAddress.match(stateZipRegex);
-
-            correctedRow[5] = streetMatch ? streetMatch[1].trim() : ''; // Street
-            correctedRow[7] = cityMatch ? cityMatch[1].trim() : ''; // City
-            correctedRow[8] = stateZipMatch ? stateZipMatch[1].trim() : ''; // State
-            correctedRow[9] = stateZipMatch ? stateZipMatch[2].trim() : ''; // Zip
-
-            // Populate other data from the assumed columns
-            correctedRow[0] = row[3] || ''; // Directory Link from Column D
-            correctedRow[1] = row[7] || ''; // Business Name from Column H
-            // Continue populating the rest of the data as per the original format
-
-            correctedData.push(correctedRow);
-        }
-        return correctedData;
+    if (file) {
+        Papa.parse(file, {
+            complete: function(results) {
+                var correctedData = correctAddresses(results.data);
+                downloadCorrectedCSV(correctedData);
+            },
+            error: function(err) {
+                alert('Error reading CSV: ' + err.message);
+            }
+        });
+    } else {
+        alert('Please select a CSV file to process.');
     }
+});
 
-    function downloadCorrectedExcel(data) {
-        var wb = XLSX.utils.book_new();
-        var ws = XLSX.utils.aoa_to_sheet(data);
+function correctAddresses(rows) {
+    let correctedData = [];
+    let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Street', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
+    correctedData.push(headers);
 
-        // Apply bold to header row
-        for (var C = 0; C != ws['!ref'].split(":")[1].charCodeAt(0) - 64; ++C) {
-            var cell_address = XLSX.utils.encode_cell({ c: C, r: 0 }); // 0 is the first row (header)
-            if (!ws[cell_address]) continue;
-            ws[cell_address].s = {
-                font: {
-                    bold: true
-                }
-            };
-        }
+    for (let i = 1; i < rows.length; i++) {
+        let row = rows[i];
+        let fullAddress = row[12] || ''; // Column M is at index 12
+        let correctedRow = new Array(headers.length).fill('');
 
-        // Setting the header row to be frozen
-        ws['!freeze'] = { xSplit: "0", ySplit: "1", topLeftCell: "A2", activePane: "bottomLeft", state: "frozen" };
+        // Example logic for parsing the full address into components
+        // This needs to be tailored to your specific address format
+        let parts = fullAddress.split(', ');
+        correctedRow[5] = parts[0] || ''; // Street
+        correctedRow[6] = parts[1] || ''; // Address line 2
+        correctedRow[7] = parts[2] || ''; // City
+        correctedRow[8] = (parts[3] || '').split(' ')[0]; // State
+        correctedRow[9] = (parts[3] || '').split(' ')[1]; // Zip
 
-        XLSX.utils.book_append_sheet(wb, ws, "ProcessedData");
-        XLSX.writeFile(wb, 'processed_data.xlsx');
+        // Copy other columns from the original row as they are
+        correctedRow[0] = row[0] || ''; // Directory Link from Column A
+        correctedRow[1] = row[1] || ''; // Business Name from Column B
+        // ... Add logic to copy other columns from the original row
+        correctedRow[10] = row[10] || ''; // Phone from Column K
+        correctedRow[11] = row[11] || ''; // Country from Column L
+        correctedRow[12] = row[12] || ''; // Email from Column M
+        correctedRow[13] = row[13] || ''; // Website from Column N
+        // ... Continue for the rest of the columns
+
+        correctedData.push(correctedRow);
     }
+    return correctedData;
+}
+
+function downloadCorrectedCSV(data) {
+    var csvContent = "data:text/csv;charset=utf-8," + data.map(e => e.join(",")).join("\n");
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "corrected_addresses.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 </script>
 </body>
 </html>
