@@ -122,6 +122,41 @@ document.getElementById('processBtn').addEventListener('click', function() {
     }
 });
 
+function extractStreet(address) {
+    // Example regular expression for street - adjust as needed
+    var streetRegex = /\d+\s[a-zA-Z\s]+/;
+    var match = address.match(streetRegex);
+    return match ? match[0] : '';
+}
+
+function extractSuite(address) {
+    // Example regular expression for suite - adjust as needed
+    var suiteRegex = /(Suite\s\d+|Unit\s\d+)/;
+    var match = address.match(suiteRegex);
+    return match ? match[0] : '';
+}
+
+function extractCity(address) {
+    // Example regular expression for city - adjust as needed
+    var cityRegex = /[a-zA-Z\s]+(?=,\s[A-Z]{2}|\s[A-Z]{2}\s\d{5})/;
+    var match = address.match(cityRegex);
+    return match ? match[0] : '';
+}
+
+function extractState(address) {
+    // Example regular expression for state - adjust as needed
+    var stateRegex = /\b[A-Z]{2}\b/;
+    var match = address.match(stateRegex);
+    return match ? match[0] : '';
+}
+
+function extractZip(address) {
+    // Example regular expression for zip code - adjust as needed
+    var zipRegex = /\d{5}$/;
+    var match = address.match(zipRegex);
+    return match ? match[0] : '';
+}
+
 function correctAddresses(rows) {
     let correctedData = [];
     let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Street', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
@@ -129,27 +164,21 @@ function correctAddresses(rows) {
 
     for (let i = 1; i < rows.length; i++) {
         let row = rows[i];
-        let fullAddress = row[12] || ''; // Column M is at index 12
+        let fullAddress = row[5] || ''; // Assuming full address is in column F
         let correctedRow = new Array(headers.length).fill('');
 
-        // Example logic for parsing the full address into components
-        // This needs to be tailored to your specific address format
-        let parts = fullAddress.split(', ');
-        correctedRow[5] = parts[0] || ''; // Street
-        correctedRow[6] = parts[1] || ''; // Address line 2
-        correctedRow[7] = parts[2] || ''; // City
-        correctedRow[8] = (parts[3] || '').split(' ')[0]; // State
-        correctedRow[9] = (parts[3] || '').split(' ')[1]; // Zip
+        correctedRow[5] = extractStreet(fullAddress);
+        correctedRow[6] = extractSuite(fullAddress);
+        correctedRow[7] = extractCity(fullAddress);
+        correctedRow[8] = extractState(fullAddress);
+        correctedRow[9] = extractZip(fullAddress);
 
         // Copy other columns from the original row as they are
-        correctedRow[0] = row[0] || ''; // Directory Link from Column A
-        correctedRow[1] = row[1] || ''; // Business Name from Column B
-        // ... Add logic to copy other columns from the original row
-        correctedRow[10] = row[10] || ''; // Phone from Column K
-        correctedRow[11] = row[11] || ''; // Country from Column L
-        correctedRow[12] = row[12] || ''; // Email from Column M
-        correctedRow[13] = row[13] || ''; // Website from Column N
-        // ... Continue for the rest of the columns
+        for (let j = 0; j < row.length; j++) {
+            if (j < 5 || j > 9) { // Avoid overwriting new address columns
+                correctedRow[j] = row[j] || '';
+            }
+        }
 
         correctedData.push(correctedRow);
     }
