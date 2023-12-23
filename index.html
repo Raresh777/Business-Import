@@ -100,130 +100,130 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script>
-        document.getElementById('processBtn').addEventListener('click', function() {
-            var fileInput = document.getElementById('csvFile');
-            var file = fileInput.files[0];
+    document.getElementById('processBtn').addEventListener('click', function() {
+        var fileInput = document.getElementById('csvFile');
+        var file = fileInput.files[0];
 
-            if (file) {
-                Papa.parse(file, {
-                    complete: function(results) {
-                        var data = results.data;
-                        var correctedData = correctAddresses(data);
-                        downloadCorrectedExcel(correctedData);
-                    }
-                });
-            } else {
-                alert('Please select a CSV file to process.');
-            }
+        if (file) {
+            Papa.parse(file, {
+                complete: function(results) {
+                    var data = results.data;
+                    var correctedData = correctAddresses(data);
+                    downloadCorrectedExcel(correctedData);
+                }
+            });
+        } else {
+            alert('Please select a CSV file to process.');
+        }
+    });
+
+    function correctAddresses(rows) {
+        let correctedData = [];
+        let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
+        correctedData.push(headers);
+
+        rows.forEach((row, index) => {
+            if (index === 0) return;
+
+            let fullAddress = row[12];
+            let correctedRow = new Array(headers.length).fill('');
+
+            correctedRow[5] = extractStreet(fullAddress);
+            correctedRow[6] = extractSuite(fullAddress);
+            correctedRow[7] = extractCity(fullAddress);
+            correctedRow[8] = extractState(fullAddress);
+            correctedRow[9] = extractZip(fullAddress);
+
+            correctedRow[0] = row[3] || '';
+            correctedRow[1] = row[7] || '';
+            correctedRow[2] = 'Shop Local';
+            correctedRow[3] = 'Essential Business';
+            correctedRow[4] = row[11] || '';
+            correctedRow[10] = (row[6] || '').replace(/\D/g, '');
+            correctedRow[11] = 'US';
+            correctedRow[12] = row[9] || '';
+
+            correctedData.push(correctedRow);
         });
 
-        function correctAddresses(rows) {
-            let correctedData = [];
-            let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link'];
-            correctedData.push(headers);
+        return correctedData;
+    }
 
-            rows.forEach((row, index) => {
-                if (index === 0) return;
+    function extractStreet(address) {
+        var streetRegex = /\d+\s[a-zA-Z\s]+/;
+        var match = address.match(streetRegex);
+        return match ? match[0] : '';
+    }
 
-                let fullAddress = row[12];
-                let correctedRow = new Array(headers.length).fill('');
+    function extractSuite(address) {
+        var suiteRegex = /(Suite\s\d+|Unit\s\d+)/;
+        var match = address.match(suiteRegex);
+        return match ? match[0] : '';
+    }
 
-                correctedRow[5] = extractStreet(fullAddress);
-                correctedRow[6] = extractSuite(fullAddress);
-                correctedRow[7] = extractCity(fullAddress);
-                correctedRow[8] = extractState(fullAddress);
-                correctedRow[9] = extractZip(fullAddress);
+    function extractCity(address) {
+        var cityRegex = /[a-zA-Z\s]+(?=,\s[A-Z]{2}|\s[A-Z]{2}\s\d{5})/;
+        var match = address.match(cityRegex);
+        return match ? match[0] : '';
+    }
 
-                correctedRow[0] = row[3] || '';
-                correctedRow[1] = row[7] || '';
-                correctedRow[2] = 'Shop Local';
-                correctedRow[3] = 'Essential Business';
-                correctedRow[4] = row[11] || '';
-                correctedRow[10] = (row[6] || '').replace(/\D/g, '');
-                correctedRow[11] = 'US';
-                correctedRow[12] = row[9] || '';
+    function extractState(address) {
+        var stateRegex = /\b[A-Z]{2}\b/;
+        var match = address.match(stateRegex);
+        return match ? match[0] : '';
+    }
 
-                correctedData.push(correctedRow);
-            });
+    function extractZip(address) {
+        var zipRegex = /\d{5}$/;
+        var match = address.match(zipRegex);
+        return match ? match[0] : '';
+    }
 
-            return correctedData;
+    function s2ab(s) {
+        var buf = new ArrayBuffer(s.length);
+        var view = new Uint8Array(buf);
+        for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+        return buf;
+    }
+
+    function formatExcel(workbook) {
+        var ws = workbook.Sheets[workbook.SheetNames[0]];
+
+        var range = XLSX.utils.decode_range(ws['!ref']);
+        for(var C = range.s.c; C <= range.e.c; ++C) {
+            var address = XLSX.utils.encode_col(C) + "1";
+            if(!ws[address]) continue;
+            ws[address].s = {
+                font: {
+                    bold: true
+                }
+            };
         }
 
-        function extractStreet(address) {
-            var streetRegex = /\d+\s[a-zA-Z\s]+/;
-            var match = address.match(streetRegex);
-            return match ? match[0] : '';
-        }
+        if(!ws['!rows']) ws['!rows'] = [];
+        ws['!rows'][0] = { hpx: 21 };
 
-        function extractSuite(address) {
-            var suiteRegex = /(Suite\s\d+|Unit\s\d+)/;
-            var match = address.match(suiteRegex);
-            return match ? match[0] : '';
-        }
+        ws['!freeze'] = { xSplit: "0", ySplit: "1" };
+    }
 
-        function extractCity(address) {
-            var cityRegex = /[a-zA-Z\s]+(?=,\s[A-Z]{2}|\s[A-Z]{2}\s\d{5})/;
-            var match = address.match(cityRegex);
-            return match ? match[0] : '';
-        }
+    function downloadCorrectedExcel(data) {
+        var workbook = XLSX.utils.book_new();
+        var worksheet = XLSX.utils.aoa_to_sheet(data);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Corrected Data");
 
-        function extractState(address) {
-            var stateRegex = /\b[A-Z]{2}\b/;
-            var match = address.match(stateRegex);
-            return match ? match[0] : '';
-        }
+        formatExcel(workbook);
 
-        function extractZip(address) {
-            var zipRegex = /\d{5}$/;
-            var match = address.match(zipRegex);
-            return match ? match[0] : '';
-        }
-
-        function s2ab(s) {
-            var buf = new ArrayBuffer(s.length);
-            var view = new Uint8Array(buf);
-            for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
-            return buf;
-        }
-
-        function formatExcel(workbook) {
-            var ws = workbook.Sheets[workbook.SheetNames[0]];
-
-            var range = XLSX.utils.decode_range(ws['!ref']);
-            for(var C = range.s.c; C <= range.e.c; ++C) {
-                var address = XLSX.utils.encode_col(C) + "1";
-                if(!ws[address]) continue;
-                ws[address].s = {
-                    font: {
-                        bold: true
-                    }
-                };
-            }
-
-            if(!ws['!rows']) ws['!rows'] = [];
-            ws['!rows'][0] = { hpx: 21 };
-
-            ws['!freeze'] = { xSplit: "0", ySplit: "1" };
-        }
-
-        function downloadCorrectedExcel(data) {
-            var workbook = XLSX.utils.book_new();
-            var worksheet = XLSX.utils.aoa_to_sheet(data);
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Corrected Data");
-
-            formatExcel(workbook);
-
-            var wbout = XLSX.write(workbook, {bookType: 'xlsx', type: 'binary'});
-            var blob = new Blob([s2ab(wbout)], {type: "application/octet-stream"});
-            var link = document.createElement('a');
-            var url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'corrected_addresses.xlsx');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    </script>
+        var wbout = XLSX.write(workbook, {bookType: 'xlsx', type: 'binary'});
+        var blob = new Blob([s2ab(wbout)], {type: "application/octet-stream"});
+        var link = document.createElement('a');
+        var url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'corrected_addresses.xlsx');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
 </body>
 </html>
