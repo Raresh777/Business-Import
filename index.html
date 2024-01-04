@@ -128,39 +128,44 @@
         }
 
         function correctAddresses(rows) {
-            let correctedData = [];
-            let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 
-    'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 
-    'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link',
-    'image', 'bbb accredited', 'category 2', 'sub category 2', 'category 3', 'sub category 3'];
-            correctedData.push(headers);
+    let correctedData = [];
+    let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 
+'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 
+'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link',
+'image', 'bbb accredited', 'category 2', 'sub category 2', 'category 3', 'sub category 3'];
+    correctedData.push(headers);
 
-            rows.forEach((row, index) => {
-                if (index === 0) return;
+    rows.forEach((row, index) => {
+        if (index === 0) return;
 
-                let fullAddress = row[12];
-                let correctedRow = new Array(headers.length).fill('');
+        let directoryLink = row[0]; // Assuming Directory Link is in the first column
+        let includesLocal = directoryLink.includes('local');
+        let fullAddress = row[12];
+        let correctedRow = new Array(headers.length).fill('');
 
-                correctedRow[5] = extractStreet(fullAddress);
-                correctedRow[6] = extractSuite(fullAddress);
-                correctedRow[7] = extractCity(fullAddress);
-                correctedRow[8] = extractState(fullAddress);
-                correctedRow[9] = extractZip(fullAddress);
+        // Retain only links containing 'local' in Directory Link
+        correctedRow[0] = includesLocal ? directoryLink : '';
 
-                correctedRow[0] = row[3] || ''; // Directory Link from Column D
-                correctedRow[1] = row[7] || ''; // Business Name from Column H
-                correctedRow[2] = 'Shop Local'; // Category 1
-                correctedRow[3] = 'Essential Business'; // Sub category 1
-                correctedRow[4] = row[11] || ''; // About from Column L
-                correctedRow[10] = (row[6] || '').replace(/\D/g, ''); // Phone from Column G
-                correctedRow[11] = 'US'; // Country
-                correctedRow[12] = row[9] || ''; // Email from Column J
+        correctedRow[5] = extractStreet(fullAddress);
+        correctedRow[6] = extractSuite(fullAddress);
+        correctedRow[7] = extractCity(fullAddress);
+        correctedRow[8] = extractState(fullAddress);
+        correctedRow[9] = extractZip(fullAddress);
 
-                correctedData.push(correctedRow);
-            });
+        // Copy remaining data as is, with modifications as needed
+        correctedRow[1] = row[7] || ''; // Business Name from Column H
+        correctedRow[2] = 'Shop Local'; // Category 1
+        correctedRow[3] = 'Essential Business'; // Sub category 1
+        correctedRow[4] = row[11] || ''; // About from Column L
+        correctedRow[10] = (row[6] || '').replace(/\D/g, ''); // Phone from Column G
+        correctedRow[11] = 'US'; // Country
+        correctedRow[12] = row[9] || ''; // Email from Column J
 
-            return correctedData;
-        }
+        correctedData.push(correctedRow);
+    });
+
+    return correctedData;
+}
 
         function downloadCorrectedXLSX(data) {
             var workbook = XLSX.utils.book_new();
