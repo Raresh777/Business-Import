@@ -84,6 +84,20 @@
 </div>
 
     <script>
+
+        // Fetch and parse the valid links from GitHub
+    let validLinks = [];
+
+    fetch('https://raw.githubusercontent.com/Raresh777/Business-Import-TESTER/main/local%20links%20-%20Sheet1.csv')
+        .then(response => response.text())
+        .then(text => {
+            Papa.parse(text, {
+                complete: function(results) {
+                    validLinks = results.data.map(row => row[0].toLowerCase());
+                }
+            });
+        });
+        
         document.getElementById('processBtn').addEventListener('click', function() {
     var fileInput = document.getElementById('csvFile');
     var file = fileInput.files[0];
@@ -150,23 +164,19 @@ document.getElementById('csvFile').addEventListener('change', function() {
     correctedData.push(headers);
 
     rows.forEach((row, index) => {
-        if (index === 0) return;
+        if (index === 0) return; // Skip header row
 
         let directoryLink = row[0] || ''; // Assuming Directory Link is in the first column
-        let includesLocal = directoryLink.toLowerCase().includes('local');
-        let fullAddress = row[12];
+        let isLinkValid = validLinks.includes(directoryLink.toLowerCase());
+        let fullAddress = row[12] || '';
         let correctedRow = new Array(headers.length).fill('');
 
-        // Retain only links containing 'local' in Directory Link
-        correctedRow[0] = includesLocal ? directoryLink : '';
-
+        correctedRow[0] = isLinkValid ? directoryLink : ''; // Retain link if it's valid
         correctedRow[5] = extractStreet(fullAddress);
         correctedRow[6] = extractSuite(fullAddress);
         correctedRow[7] = extractCity(fullAddress);
         correctedRow[8] = extractState(fullAddress);
         correctedRow[9] = extractZip(fullAddress);
-
-        // Copy remaining data as is, with modifications as needed
         correctedRow[1] = row[7] || ''; // Business Name from Column H
         correctedRow[2] = 'Shop Local'; // Category 1
         correctedRow[3] = 'Essential Business'; // Sub category 1
@@ -174,6 +184,7 @@ document.getElementById('csvFile').addEventListener('change', function() {
         correctedRow[10] = (row[6] || '').replace(/\D/g, ''); // Phone from Column G
         correctedRow[11] = 'US'; // Country
         correctedRow[12] = row[9] || ''; // Email from Column J
+        // Add other columns as needed
 
         correctedData.push(correctedRow);
     });
