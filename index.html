@@ -152,8 +152,8 @@ document.getElementById('csvFile').addEventListener('change', function() {
     rows.forEach((row, index) => {
         if (index === 0) return;
 
-        let directoryLink = row[0]; // Assuming Directory Link is in the first column
-        let includesLocal = directoryLink.includes('local');
+        let directoryLink = row[0] || ''; // Assuming Directory Link is in the first column
+        let includesLocal = directoryLink.toLowerCase().includes('local');
         let fullAddress = row[12];
         let correctedRow = new Array(headers.length).fill('');
 
@@ -180,7 +180,6 @@ document.getElementById('csvFile').addEventListener('change', function() {
 
     return correctedData;
 }
-
         function downloadCorrectedXLSX(data) {
             var workbook = XLSX.utils.book_new();
             var worksheet = XLSX.utils.aoa_to_sheet(data);
