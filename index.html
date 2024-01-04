@@ -28,6 +28,9 @@
 .button-container {
     position: relative; /* Relative to the container */
 }
+        .button-green {
+    background-color: green !important; /* Using !important to override inline styles if necessary */
+}
 
 .input-file-trigger, .styled-button {
     background: rgba(255, 255, 255, 0.3); /* Lightly visible background */
@@ -59,6 +62,7 @@
     display: inline-block;
     text-align: center;
 }
+        
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -81,21 +85,31 @@
 
     <script>
         document.getElementById('processBtn').addEventListener('click', function() {
-            var fileInput = document.getElementById('csvFile');
-            var file = fileInput.files[0];
+    var fileInput = document.getElementById('csvFile');
+    var file = fileInput.files[0];
 
-            if (file) {
-                Papa.parse(file, {
-                    complete: function(results) {
-                        var data = results.data;
-                        var correctedData = correctAddresses(data);
-                        downloadCorrectedXLSX(correctedData);
-                    }
-                });
-            } else {
-                alert('Please select a CSV file to process.');
+    if (file) {
+        Papa.parse(file, {
+            complete: function(results) {
+                var data = results.data;
+                var correctedData = correctAddresses(data);
+                downloadCorrectedXLSX(correctedData);
             }
         });
+
+        // Reset button color when processing starts
+        fileInput.nextElementSibling.style.backgroundColor = '';
+    } else {
+        alert('Please select a CSV file to process.');
+    }
+});
+
+document.getElementById('csvFile').addEventListener('change', function() {
+    if (this.files[0]) {
+        // Change button color to green when a file is selected
+        this.nextElementSibling.style.backgroundColor = 'green';
+    }
+});
 
         function extractStreet(address) {
             var streetRegex = /\d+\s[a-zA-Z\s]+/;
