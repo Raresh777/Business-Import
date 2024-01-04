@@ -30,9 +30,9 @@
 }
 
 .input-file-trigger, .styled-button {
-    background: transparent;
-    color: transparent; /* Text is transparent until hovered */
-    border: 2px solid transparent; /* Border is transparent until hovered */
+    background: rgba(255, 255, 255, 0.1); /* Slightly visible background */
+    color: white; /* White text */
+    border: 2px solid rgba(255, 255, 255, 0.3); /* Slightly visible border */
     padding: 10px 20px;
     margin: 0 20px; /* Add margin to space out buttons if needed */
     cursor: pointer;
@@ -40,11 +40,11 @@
 }
 
 .input-file-trigger:hover, .styled-button:hover {
-    color: white; /* Text color on hover */
-    background-color: rgba(255, 255, 255, 0.1); /* Button background on hover */
+    color: black; /* Text color on hover */
+    background-color: white; /* Button background on hover */
     border-color: white; /* Border color on hover */
 }
-
+        
 .input-file {
     width: 0.1px;
     height: 0.1px;
