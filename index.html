@@ -142,27 +142,31 @@
             return match ? match[0] : '';
         }
 
-      function correctAddresses(rows) {
+     function correctAddresses(rows) {
     let correctedData = [];
-    let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link', 'image', 'bbb accredited', 'category 2', 'sub category 2', 'category 3', 'sub category 3'];
+    let headers = ['Directory Link', 'Business Name', 'Category 1', 'Sub category 1', 'About', 'Address', 
+    'Address line 2', 'City', 'State', 'Zip', 'Phone', 'Country', 'Email', 'Website', 
+    'Instagram username', 'Facebook username', 'Twitter username', 'YouTube video link',
+    'image', 'bbb accredited', 'category 2', 'sub category 2', 'category 3', 'sub category 3'];
     correctedData.push(headers);
 
     rows.forEach((row, index) => {
         if (index === 0) return; // Skip header row
 
         let directoryLink = row[3] || '';
-        let fullAddress = row[12] || '';
-        let correctedRow = new Array(headers.length).fill('');
-
         if (!directoryLink.toLowerCase().includes('local')) return; // Skip row if 'local' is not in the directory link
 
+        let fullAddress = row[12] || '';
+        let correctedRow = row.slice(); // Copy all existing data from the row
+
         correctedRow[0] = directoryLink; // Directory Link
-        correctedRow[5] = extractStreet(fullAddress);
-        correctedRow[6] = extractSuite(fullAddress);
-        correctedRow[7] = extractCity(fullAddress);
-        correctedRow[8] = extractState(fullAddress);
-        correctedRow[9] = extractZip(fullAddress);
-        // ... other data assignments ...
+        correctedRow[5] = extractStreet(fullAddress); // Extracted Street
+        correctedRow[6] = extractSuite(fullAddress); // Extracted Suite
+        correctedRow[7] = extractCity(fullAddress); // Extracted City
+        correctedRow[8] = extractState(fullAddress); // Extracted State
+        correctedRow[9] = extractZip(fullAddress); // Extracted ZIP
+
+        // Assign other extracted address components as needed
 
         correctedData.push(correctedRow);
     });
