@@ -88,14 +88,23 @@
         // Fetch and parse the valid links from GitHub
     let validLinks = [];
 
+        // Disable the process button initially
+    document.getElementById('processBtn').disabled = true;
+
     fetch('https://raw.githubusercontent.com/Raresh777/Business-Import-TESTER/main/local%20links%20-%20Sheet1.csv')
         .then(response => response.text())
         .then(text => {
             Papa.parse(text, {
                 complete: function(results) {
                     validLinks = results.data.map(row => row[0].toLowerCase());
+                    // Enable the process button after fetching and parsing is complete
+                    document.getElementById('processBtn').disabled = false;
                 }
             });
+        })
+        .catch(error => {
+            console.error('Error fetching valid links:', error);
+            alert('Failed to load valid links. Please try again later.');
         });
         
         document.getElementById('processBtn').addEventListener('click', function() {
