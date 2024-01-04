@@ -153,25 +153,29 @@
     rows.forEach((row, index) => {
         if (index === 0) return; // Skip header row
 
-        let directoryLink = row[3] || ''; // Assuming Directory Link is in Column D
-        let fullAddress = row[12] || ''; // Assuming full address is in Column M
+        let fullAddress = row[12];
+        let directoryLink = row[3];
         let correctedRow = new Array(headers.length).fill('');
 
-        if (directoryLink.toLowerCase().includes('local')) {
-            correctedRow[0] = directoryLink; // Include link if it contains 'local'
+        // Check if directory link contains 'local'
+        if (directoryLink && directoryLink.toLowerCase().includes('local')) {
+            correctedRow[0] = directoryLink;
         }
 
         // Extract and set other address components
         correctedRow[5] = extractStreet(fullAddress);
         correctedRow[6] = extractSuite(fullAddress);
-        // ... other extractions and column settings
+        correctedRow[7] = extractCity(fullAddress);
+        correctedRow[8] = extractState(fullAddress);
+        correctedRow[9] = extractZip(fullAddress);
+
+        // ... other data assignments ...
 
         correctedData.push(correctedRow);
     });
 
     return correctedData;
 }
-
         function downloadCorrectedXLSX(data) {
             var workbook = XLSX.utils.book_new();
             var worksheet = XLSX.utils.aoa_to_sheet(data);
