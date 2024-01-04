@@ -17,82 +17,67 @@
     justify-content: center;
 }
         .container {
-            background: rgba(0, 0, 0, 0.75);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            width: 40%;
-            min-width: 300px;
-        }
-        h1 {
-            text-align: center;
-            color: #fff;
-            margin-bottom: 20px;
-            font-weight: 300;
-        }
-        .styled-button {
-            display: block;
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-top: 20px;
-            background: linear-gradient(45deg, #9c27b0, #ff9800);
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-            outline: none;
-            text-align: center;
-        }
-        .styled-button:hover, .styled-button:focus {
-            background: linear-gradient(45deg, #ff9800, #9c27b0);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-        }
-        /* Hidden input file styling */
-        .input-file-container {
-            position: relative;
-            width: calc(100% - 20px);
-        }
-        .input-file-trigger {
-            display: block;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            background: linear-gradient(45deg, #9c27b0, #ff9800);
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-            width: 100%;
-        }
-        .input-file {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-        .input-file-trigger:hover, .input-file-trigger:focus {
-            background: linear-gradient(45deg, #ff9800, #9c27b0);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-        }
+    position: relative;
+    width: 100%; /* Full width */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    justify-content: space-around; /* Spreads out the buttons evenly */
+    align-items: center; /* Vertically center the buttons */
+}
+
+.button-container {
+    position: relative; /* Relative to the container */
+}
+
+.input-file-trigger, .styled-button {
+    background: transparent;
+    color: transparent; /* Text is transparent until hovered */
+    border: 2px solid transparent; /* Border is transparent until hovered */
+    padding: 10px 20px;
+    margin: 0 20px; /* Add margin to space out buttons if needed */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.input-file-trigger:hover, .styled-button:hover {
+    color: white; /* Text color on hover */
+    background-color: rgba(255, 255, 255, 0.1); /* Button background on hover */
+    border-color: white; /* Border color on hover */
+}
+
+.input-file {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.input-file-trigger {
+    font-size: 16px; /* Adjust size as needed */
+    display: inline-block;
+    text-align: center;
+}
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <div class="input-file-container">
-            <label class="input-file-trigger" for="csvFile">Select CSV File</label>
-            <input type="file" id="csvFile" class="input-file" accept=".csv">
-        </div>
+    <!-- Left side button for selecting CSV file -->
+    <div class="button-container left">
+        <label class="input-file-trigger" for="csvFile">Select CSV File</label>
+        <input type="file" id="csvFile" class="input-file" accept=".csv">
+    </div>
+
+    <!-- Placeholder for the tree image, if it's in the HTML -->
+
+    <!-- Right side button for processing the CSV -->
+    <div class="button-container right">
         <button id="processBtn" class="styled-button">Process CSV</button>
     </div>
+</div>
 
     <script>
         document.getElementById('processBtn').addEventListener('click', function() {
