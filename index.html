@@ -197,10 +197,7 @@ function formatUSPhone(phone) {
         return phone;
     }
 }
-    return correctedData;
-}
-
-        function downloadCorrectedXLSX(data) {
+    function downloadCorrectedXLSX(data) {
             var workbook = XLSX.utils.book_new();
             var worksheet = XLSX.utils.aoa_to_sheet(data);
 
