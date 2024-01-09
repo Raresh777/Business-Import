@@ -162,26 +162,26 @@ function formatUSPhone(phone) {
         return phone;
     }
 }
-    function downloadCorrectedXLSX(data) {
-            var workbook = XLSX.utils.book_new();
-            var worksheet = XLSX.utils.aoa_to_sheet(data);
+   function downloadCorrectedXLSX(data) {
+    var workbook = XLSX.utils.book_new();
+    var worksheet = XLSX.utils.aoa_to_sheet(data);
 
-            // Apply formatting
-            worksheet['!cols'] = [{ wpx: 150 }]; // Set column width
-            worksheet['!rows'] = data.map((_, index) => ({ hpx: index === 0 ? 21 : 20 })); // Set row heights
+    // Apply formatting
+    worksheet['!cols'] = [{ wpx: 150 }]; // Set column width
+    worksheet['!rows'] = data.map((_, index) => ({ hpx: index === 0 ? 21 : 20 })); // Set row heights
 
-            // Freeze and bold the first row
-            worksheet['!freeze'] = { xSplit: "1", ySplit: "1" };
-            var range = XLSX.utils.decode_range(worksheet['!ref']);
-            for(var C = range.s.c; C <= range.e.c; ++C) {
-                var address = XLSX.utils.encode_col(C) + "1"; // Get cell address
-                if(!worksheet[address]) continue;
-                worksheet[address].s = { font: { bold: true } };
-            }
+    // Freeze and bold the first row
+    worksheet['!freeze'] = { xSplit: "1", ySplit: "1" };
+    var range = XLSX.utils.decode_range(worksheet['!ref']);
+    for(var C = range.s.c; C <= range.e.c; ++C) {
+        var address = XLSX.utils.encode_col(C) + "1"; // Get cell address
+        if(!worksheet[address]) continue;
+        worksheet[address].s = { font: { bold: true } };
+    }
 
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-            XLSX.writeFile(workbook, 'corrected_addresses.xlsx');
-        }
+    XLSX.utils.book_append_sheet(workbook, worksheet, "BizImport"); // Changed sheet name here
+    XLSX.writeFile(workbook, 'corrected_addresses.xlsx');
+}
     </script>
 </body>
 </html>
