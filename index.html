@@ -164,13 +164,12 @@
         correctedRow[8] = extractState(fullAddress);
         correctedRow[9] = extractZip(fullAddress);
 
-        // Validate and format phone number
+        // Validate phone number
         let phone = row[6];
-        if (isValidUSPhone(phone)) {
-            correctedRow[10] = formatUSPhone(phone);
-        } else {
-            correctedRow[10] = 'Invalid Phone'; // or handle invalid phone numbers as needed
+        if (!isValidUSPhone(phone)) {
+            return; // Skip the entire row if the phone number is invalid
         }
+        correctedRow[10] = formatUSPhone(phone); // Format valid phone number
 
         correctedRow[11] = 'US'; // Country
         correctedRow[12] = row[9]; // Email from Column J
