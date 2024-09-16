@@ -83,20 +83,25 @@
             }
 
             const cleanedRows = rows.map((row, rowIndex) => {
-                if (rowIndex === 0) return row; // Skip header
-                
+                // Preserve empty rows or incomplete rows without modification
+                if (row.length === 1 && row[0] === "") return row;
+
                 const cleanedRow = [...row];
 
                 // Clean First Name
-                cleanedRow[firstNameIndex] = cleanText(row[firstNameIndex]);
+                if (cleanedRow[firstNameIndex]) {
+                    cleanedRow[firstNameIndex] = cleanText(row[firstNameIndex]);
+                }
 
                 // Clean Last Name
-                cleanedRow[lastNameIndex] = cleanText(row[lastNameIndex]);
+                if (cleanedRow[lastNameIndex]) {
+                    cleanedRow[lastNameIndex] = cleanText(row[lastNameIndex]);
+                }
 
                 return cleanedRow;
             });
 
-            // Convert cleaned data back to CSV format
+            // Convert cleaned data back to CSV format without changing row order
             const cleanedCSV = cleanedRows.map(row => row.join(",")).join("\n");
             downloadCSV(cleanedCSV);
         }
