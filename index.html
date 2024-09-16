@@ -11,9 +11,6 @@
       color: #00FF00;
       padding: 40px;
       font-size: 18px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
     }
 
     h1 {
@@ -42,35 +39,20 @@
       padding: 20px;
       background-color: rgba(0, 0, 0, 0.3);
       border-radius: 12px;
-      width: 80%;
+      display: flex;
+      flex-direction: column;
     }
 
-    #summary {
-      width: 40%;
-      margin-left: 30px;
+    .result-section {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 40px;
     }
 
     h2, h3 {
       color: #00FF00;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      font-size: 18px;
-    }
-
-    #buttons-container {
-      display: flex;
-      justify-content: center;
-    }
-
-    .small-chart {
-      max-width: 600px;
-      margin: 0 auto;
     }
 
     table {
@@ -93,60 +75,81 @@
     td {
       background-color: rgba(0, 0, 0, 0.1);
     }
+
+    .chart-container, .table-container {
+      width: 48%;
+    }
+
+    .small-chart {
+      max-width: 600px;
+      margin: 0 auto;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div>
-    <h1>Leads Summary by Date Range</h1>
+  <h1>Leads Summary by Date Range</h1>
 
-    <div id="buttons-container">
-      <input type="file" id="csvFileInput" accept=".csv" />
-      <input type="date" id="startDatePicker">
-      <input type="date" id="endDatePicker">
-    </div>
+  <div id="buttons-container">
+    <input type="file" id="csvFileInput" accept=".csv" />
+    <input type="date" id="startDatePicker">
+    <input type="date" id="endDatePicker">
+  </div>
 
-    <div id="buttons-container">
-      <button onclick="processLeads()">Show Leads Summary</button>
-    </div>
+  <div id="buttons-container">
+    <button onclick="processLeads()">Show Leads Summary</button>
+  </div>
 
-    <div id="results" style="display:none;">
-      <h2>Results from <span id="startDate"></span> to <span id="endDate"></span></h2>
+  <div id="results" style="display:none;">
+    <h2>Results from <span id="startDate"></span> to <span id="endDate"></span></h2>
 
-      <div class="result-section">
-        <h3>Total Leads: <span id="totalLeads"></span></h3>
-      </div>
-
-      <div class="result-section">
+    <!-- Leads by Location Section -->
+    <div class="result-section">
+      <div class="chart-container">
         <h3>Leads by Location</h3>
         <div class="small-chart">
           <canvas id="locationChart"></canvas>
         </div>
       </div>
+      <div class="table-container">
+        <h3>Lead Summary</h3>
+        <table id="summaryTable">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Leads</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Summary rows will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-      <div class="result-section">
+    <!-- Leads by First Language Section -->
+    <div class="result-section">
+      <div class="chart-container">
         <h3>Leads by First Language per City</h3>
         <div class="small-chart">
           <canvas id="languageChart"></canvas>
         </div>
       </div>
+      <div class="table-container">
+        <h3>Leads by First Language per City</h3>
+        <table id="languageSummaryTable">
+          <thead>
+            <tr>
+              <th>City (Language)</th>
+              <th>Leads</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Language summary rows will be populated here -->
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-
-  <!-- Right side table for data summary -->
-  <div id="summary">
-    <h3>Lead Summary</h3>
-    <table id="summaryTable">
-      <thead>
-        <tr>
-          <th>Location</th>
-          <th>Leads</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Summary rows will be populated here -->
-      </tbody>
-    </table>
   </div>
 
   <script>
@@ -190,7 +193,9 @@
       const endDateValue = document.getElementById('endDatePicker').value;
       const resultsDiv = document.getElementById('results');
       const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
+      const languageSummaryTable = document.getElementById('languageSummaryTable').getElementsByTagName('tbody')[0];
       summaryTable.innerHTML = ''; // Clear previous results
+      languageSummaryTable.innerHTML = ''; // Clear previous results
       document.getElementById('startDate').textContent = startDateValue;
       document.getElementById('endDate').textContent = endDateValue;
 
@@ -242,6 +247,17 @@
         cell2.textContent = locationCount[location];
       }
 
+      // Populate the language summary table
+      for (let city in cityLanguageCount) {
+        for (let language in cityLanguageCount[city]) {
+          const row = languageSummaryTable.insertRow();
+                    const cell1 = row.insertCell(0);
+          const cell2 = row.insertCell(1);
+          cell1.textContent = `${city} (${language})`;
+          cell2.textContent = cityLanguageCount[city][language];
+        }
+      }
+
       updateLocationChart(locationCount);
       updateLanguageChart(cityLanguageCount);
 
@@ -262,7 +278,7 @@
         data: {
           labels: locationLabels,
           datasets: [{
-                        label: 'Leads by Location',
+            label: 'Leads by Location',
             data: locationData,
             backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green with some transparency
             hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter tropical green
@@ -372,3 +388,4 @@
   </script>
 </body>
 </html>
+
