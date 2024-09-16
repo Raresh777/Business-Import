@@ -40,6 +40,11 @@
             const firstNameIndex = firstRow.indexOf("First name");
             const lastNameIndex = firstRow.indexOf("Last name");
 
+            if (firstNameIndex === -1 || lastNameIndex === -1) {
+                alert("First name or Last name columns not found!");
+                return;
+            }
+
             const cleanedRows = rows.map((row, rowIndex) => {
                 if (rowIndex === 0) return row; // Skip header
                 
