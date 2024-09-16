@@ -6,15 +6,12 @@
     <title>CSV Cleaner</title>
     <style>
         body {
-            background-color: #000741; /* Stratos color */
+            background-color: #000741; /* Stratos background color */
             color: white;
             font-family: Arial, sans-serif;
         }
         h1 {
             color: #ffffff;
-        }
-        .red {
-            background-color: red;
         }
         input, button {
             padding: 10px;
@@ -30,21 +27,14 @@
         button:hover {
             background-color: #45a049;
         }
-        #downloadLink {
-            display: none;
-            color: #ffffff;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
     <h1>Upload CSV to Clean Names</h1>
     <input type="file" id="csvFileInput" accept=".csv" />
-    <button id="processBtn">Process File</button>
-    <a id="downloadLink">Download Cleaned CSV File</a>
-
+    
     <script>
-        document.getElementById('processBtn').addEventListener('click', () => {
+        document.getElementById('csvFileInput').addEventListener('change', () => {
             const fileInput = document.getElementById('csvFileInput');
             if (fileInput.files.length === 0) {
                 alert('Please upload a CSV file first.');
@@ -98,11 +88,13 @@
 
         function downloadCSV(csvContent) {
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.getElementById('downloadLink');
+            const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'cleaned_names.csv';
-            link.style.display = 'block';
-            link.innerText = 'Download Cleaned CSV File';
+            
+            document.body.appendChild(link);  // Append the link to the document
+            link.click();  // Automatically trigger the download
+            document.body.removeChild(link);  // Remove the link after download
         }
     </script>
 </body>
