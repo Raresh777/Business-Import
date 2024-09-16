@@ -3,46 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vintage CSV Cleaner</title>
+    <title>Clockwork CSV Cleaner</title>
     <style>
         body {
-            background-color: #f4e7d3; /* Light vintage background */
-            color: #5b3427; /* Dark brown text */
+            background-image: url('https://images.unsplash.com/photo-1558225979-94f0382ab673'); /* Steampunk clock image */
+            background-size: cover;
+            background-position: center;
             font-family: 'Courier New', Courier, monospace;
+            color: #ffffff;
             text-align: center;
+            margin: 0;
+            padding: 0;
         }
         h1 {
             font-size: 36px;
-            margin-top: 30px;
+            margin-top: 50px;
+            color: #FFD700;
+            text-shadow: 2px 2px 8px #000000;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            display: inline-block;
+            border-radius: 10px;
+            margin-top: 50px;
         }
         input[type="file"] {
             padding: 10px;
             margin: 20px;
             font-size: 16px;
-            border: 2px solid #5b3427;
-            background-color: #f9f4ef;
+            border: 2px solid #FFD700;
+            background-color: #282828;
+            color: #FFD700;
             cursor: pointer;
+            border-radius: 10px;
         }
         button {
             padding: 10px 20px;
             margin: 20px;
             font-size: 18px;
             font-weight: bold;
-            background-color: #c4a484;
-            color: #ffffff;
-            border: 2px solid #5b3427;
+            background-color: #FFD700;
+            color: #282828;
+            border: none;
             cursor: pointer;
             border-radius: 10px;
         }
         button:hover {
-            background-color: #5b3427;
+            background-color: #DAA520;
             color: #ffffff;
         }
     </style>
 </head>
 <body>
-    <h1>Upload CSV to Clean Names</h1>
-    <input type="file" id="csvFileInput" accept=".csv" />
+    <h1>Steampunk CSV Cleaner</h1>
+    <div class="container">
+        <input type="file" id="csvFileInput" accept=".csv" />
+    </div>
     
     <script>
         const cyrillicToLatinMap = {
@@ -72,8 +89,8 @@
         });
 
         function processCSV(csv) {
-            // Split the CSV into rows
-            const rows = csv.split("\n").filter(row => row.trim().length > 0); // Filter out empty rows
+            // Split the CSV into rows and filter out row 2 and 3 (index 1 and 2)
+            const rows = csv.split("\n").filter((row, index) => index !== 1 && index !== 2);
 
             const firstRow = rows[0].split(",");
             const firstNameIndex = firstRow.indexOf("First name");
