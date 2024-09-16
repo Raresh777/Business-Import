@@ -11,6 +11,8 @@
       color: #00FF00;
       padding: 40px;
       font-size: 18px;
+      display: flex;
+      flex-direction: column;
     }
 
     h1 {
@@ -40,19 +42,22 @@
       background-color: rgba(0, 0, 0, 0.3);
       border-radius: 12px;
       display: flex;
-      flex-direction: column;
-    }
-
-    .result-section {
-      display: flex;
-      flex-direction: row;
+      flex-wrap: wrap;
       justify-content: space-between;
-      width: 100%;
-      margin-bottom: 40px;
     }
 
     h2, h3 {
       color: #00FF00;
+    }
+
+    .chart-container, .table-container {
+      width: 48%;
+      margin-top: 20px;
+    }
+
+    .small-chart {
+      max-width: 600px;
+      margin: 0 auto;
     }
 
     table {
@@ -75,15 +80,6 @@
     td {
       background-color: rgba(0, 0, 0, 0.1);
     }
-
-    .chart-container, .table-container {
-      width: 48%;
-    }
-
-    .small-chart {
-      max-width: 600px;
-      margin: 0 auto;
-    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -94,12 +90,8 @@
     <input type="file" id="csvFileInput" accept=".csv" />
     <input type="date" id="startDatePicker">
     <input type="date" id="endDatePicker">
+    <button onclick="processLeads()">Show Leads Summary</button>
   </div>
-
-  <div id="buttons-container">
-    <button id="processButton" disabled>Show Leads Summary</button>
-  </div>
-
   <div id="results" style="display:none;">
     <h2>Results from <span id="startDate"></span> to <span id="endDate"></span></h2>
 
@@ -127,7 +119,7 @@
       </div>
     </div>
 
-    <!-- Leads by First Language Section -->
+    <!-- Leads by First Language per City Section -->
     <div class="result-section">
       <div class="chart-container">
         <h3>Leads by First Language per City</h3>
@@ -151,12 +143,8 @@
       </div>
     </div>
   </div>
-
   <script>
     let leadsData = [];
-    let isCSVLoaded = false;
-
-    // Chart instances
     let locationChart, languageChart;
 
     function loadCSV(event) {
@@ -168,44 +156,35 @@
         const lines = text.split('\n');
         const headers = lines[0].split(',');
 
-        // Indices for the columns we need
         const dateIdx = headers.indexOf('Submission date');
         const locationIdx = headers.indexOf('Location');
         const languageIdx = headers.indexOf('Languages');
 
-        // Extract leads data
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: new Date(fields[dateIdx]?.trim()), // Keep the date as a Date object
+            date: new Date(fields[dateIdx]?.trim()),
             location: fields[locationIdx]?.trim(),
-            language: fields[languageIdx]?.split(',')[0]?.trim().replace(/["']/g, "").trim() // Remove quotes and trim spaces
+            language: fields[languageIdx]?.split(',')[0]?.trim().replace(/["']/g, "").trim()
           };
         });
 
-        console.log("Leads Data Parsed:", leadsData); // Debugging output
-
-        // Enable the button once the CSV is loaded
-        isCSVLoaded = true;
-        document.getElementById('processButton').disabled = false;
+        console.log("Leads Data Parsed:", leadsData);
       };
       
       reader.readAsText(file);
     }
 
     function processLeads() {
-      if (!isCSVLoaded) {
-        alert("Please upload a CSV file first.");
-        return;
-      }
-
       const startDateValue = document.getElementById('startDatePicker').value;
       const endDateValue = document.getElementById('endDatePicker').value;
       const resultsDiv = document.getElementById('results');
       const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
       const languageSummaryTable = document.getElementById('languageSummaryTable').getElementsByTagName('tbody')[0];
+
       summaryTable.innerHTML = ''; // Clear previous results
       languageSummaryTable.innerHTML = ''; // Clear previous results
+
       document.getElementById('startDate').textContent = startDateValue;
       document.getElementById('endDate').textContent = endDateValue;
 
@@ -216,23 +195,17 @@
 
       const startDate = new Date(startDateValue);
       const endDate = new Date(endDateValue);
-
-      // Normalize the dates by setting the time to 00:00:00
       startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999); // Include the entire end date day
+      endDate.setHours(23, 59, 59, 999);
 
-      // Filter the leads for the selected date range
       const leadsForSelectedRange = leadsData.filter(lead => {
         const leadDate = new Date(lead.date);
-        leadDate.setHours(0, 0, 0, 0); // Normalize lead date as well
+        leadDate.setHours(0, 0, 0, 0);
         return leadDate >= startDate && leadDate <= endDate;
       });
-
       const totalLeadsCount = leadsForSelectedRange.length;
-
       document.getElementById('totalLeads').textContent = totalLeadsCount;
 
-      // Process leads by location and language per city
       const locationCount = {};
       const cityLanguageCount = {};
 
@@ -243,12 +216,11 @@
           cityLanguageCount[lead.location] = {};
         }
         if (!cityLanguageCount[lead.location][lead.language]) {
-                    cityLanguageCount[lead.location][lead.language] = 0;
+          cityLanguageCount[lead.location][lead.language] = 0;
         }
         cityLanguageCount[lead.location][lead.language] += 1;
       });
 
-      // Populate the summary table (Location)
       for (let location in locationCount) {
         const row = summaryTable.insertRow();
         const cell1 = row.insertCell(0);
@@ -257,7 +229,6 @@
         cell2.textContent = locationCount[location];
       }
 
-      // Populate the language summary table (Language per City)
       for (let city in cityLanguageCount) {
         for (let language in cityLanguageCount[city]) {
           const row = languageSummaryTable.insertRow();
@@ -273,130 +244,127 @@
 
       resultsDiv.style.display = 'block';
     }
-
     function updateLocationChart(locationCount) {
       const locationLabels = Object.keys(locationCount);
       const locationData = Object.values(locationCount);
 
-      if (locationChart) {
-        locationChart.destroy();
-      }
-
-      const ctx1 = document.getElementById('locationChart').getContext('2d');
-      locationChart = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: locationLabels,
-          datasets: [{
-            label: 'Leads by Location',
-            data: locationData,
-            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green
-            hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter green
-            borderColor: 'rgba(0, 255, 0, 1)', // Border green
-            borderWidth: 2,
-            barThickness: 50,
-            borderRadius: 10 // 3D-like effect
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: '#00FF00'
-              }
-            },
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
-              },
-              ticks: {
-                color: '#00FF00'
-              }
-            }
-          },
-          backgroundColor: 'rgba(0, 0, 0, 0.7)', // Transparent black background
-        }
-      });
+      if (locationChart)
+      locationChart.destroy();
     }
 
-    function updateLanguageChart(cityLanguageCount) {
-      const cityLanguageLabels = [];
-      const cityLanguageData = [];
-
-      Object.entries(cityLanguageCount).forEach(([city, languages]) => {
-        Object.entries(languages).forEach(([language, count]) => {
-          cityLanguageLabels.push(`${city} (${language})`);
-          cityLanguageData.push(count);
-        });
-      });
-
-      if (languageChart) {
-        languageChart.destroy();
-      }
-
-      const ctx2 = document.getElementById('languageChart').getContext('2d');
-      languageChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: cityLanguageLabels,
-          datasets: [{
-            label: 'Leads by Language per City',
-            data: cityLanguageData,
-            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green
-            hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter green
-            borderColor: 'rgba(0, 255, 0, 1)', // Border green
-            borderWidth: 2,
-            barThickness: 50,
-            borderRadius: 10 // Rounded corners for 3D effect
-          }]
+    const ctx1 = document.getElementById('locationChart').getContext('2d');
+    locationChart = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: locationLabels,
+        datasets: [{
+          label: 'Leads by Location',
+          data: locationData,
+          backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green
+          hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter green
+          borderColor: 'rgba(0, 255, 0, 1)', // Border green
+          borderWidth: 2,
+          barThickness: 50,
+          borderRadius: 10 // 3D-like effect
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          }
         },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
+        scales: {
+          x: {
+            grid: {
               display: false
-            }
-          },
-          scales: {
-            x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: '#00FF00',
-                autoSkip: false,
-                maxRotation: 45,
-                minRotation: 45
-              }
             },
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
-              },
-              ticks: {
-                color: '#00FF00'
-              }
+            ticks: {
+              color: '#00FF00'
             }
           },
-          backgroundColor: 'rgba(0, 0, 0, 0.7)', // Transparent black background
-        }
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
+            },
+            ticks: {
+              color: '#00FF00'
+            }
+          }
+        },
+        backgroundColor: 'rgba(0, 0, 0, 0.7)' // Transparent black background
+      }
+    });
+  }
+
+  function updateLanguageChart(cityLanguageCount) {
+    const cityLanguageLabels = [];
+    const cityLanguageData = [];
+
+    Object.entries(cityLanguageCount).forEach(([city, languages]) => {
+      Object.entries(languages).forEach(([language, count]) => {
+        cityLanguageLabels.push(`${city} (${language})`);
+        cityLanguageData.push(count);
       });
+    });
+
+    if (languageChart) {
+      languageChart.destroy();
     }
 
-    document.getElementById('csvFileInput').addEventListener('change', loadCSV);
-    document.getElementById('processButton').addEventListener('click', processLeads);
+    const ctx2 = document.getElementById('languageChart').getContext('2d');
+    languageChart = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: cityLanguageLabels,
+        datasets: [{
+          label: 'Leads by Language per City',
+          data: cityLanguageData,
+          backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green
+          hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter green
+          borderColor: 'rgba(0, 255, 0, 1)', // Border green
+          borderWidth: 2,
+          barThickness: 50,
+          borderRadius: 10 // Rounded corners for 3D effect
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#00FF00',
+              autoSkip: false,
+              maxRotation: 45,
+              minRotation: 45
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
+            },
+            ticks: {
+              color: '#00FF00'
+            }
+          }
+        },
+        backgroundColor: 'rgba(0, 0, 0, 0.7)' // Transparent black background
+      }
+    });
+  }
+
+  document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 </body>
 </html>
-
