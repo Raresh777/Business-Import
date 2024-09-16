@@ -82,10 +82,7 @@
                 return;
             }
 
-            const cleanedRows = rows.map((row, rowIndex) => {
-                // Preserve empty rows or incomplete rows without modification
-                if (row.length === 1 && row[0] === "") return row;
-
+            const cleanedRows = rows.filter(row => row.length > 1).map((row, rowIndex) => {
                 const cleanedRow = [...row];
 
                 // Clean First Name
