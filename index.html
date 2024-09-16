@@ -46,7 +46,6 @@
     
     <script>
         const cyrillicToLatinMap = {
-            // Add common Cyrillic letters and their Latin equivalents
             'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'E', 'Ж': 'Zh', 'З': 'Z', 'И': 'I', 'Й': 'Y',
             'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F',
             'Х': 'Kh', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Shch', 'Ы': 'Y', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya',
@@ -106,20 +105,25 @@
             if (!text) return "x";  // Handle any undefined or empty values
             
             // Remove diacritics but keep the base letters
-            text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+            let cleanText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
             
-            // Attempt to transliterate Cyrillic letters; if not possible, replace with "x"
-            text = text.split("").map(char => {
+            // Check for non-English characters
+            let containsNonEnglish = false;
+
+            // Attempt to transliterate Cyrillic letters; if not possible, flag for replacement with "x"
+            cleanText = cleanText.split("").map(char => {
                 if (cyrillicToLatinMap[char]) {
                     return cyrillicToLatinMap[char];
                 } else if (char.match(/[a-zA-Z\s]/)) {
                     return char; // Keep English letters
                 } else {
-                    return "x"; // Replace non-recognized characters with "x"
+                    containsNonEnglish = true; // Mark for replacement
+                    return "";
                 }
             }).join("");
-            
-            return text;
+
+            // If any non-English characters were found, replace the entire text with "x"
+            return containsNonEnglish ? "x" : cleanText;
         }
 
         function downloadCSV(csvContent) {
