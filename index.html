@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: 'Arial', sans-serif;
-      background-color: rgba(0, 0, 0, 0.7);
+      background-color: rgba(128, 0, 128, 0.7); /* Transparent-violet */
       color: #00FF00;
       padding: 40px;
       font-size: 18px;
@@ -156,20 +156,22 @@
         const lines = text.split('\n');
         const headers = lines[0].split(',');
 
+        // Indices for CSV columns
         const dateIdx = headers.indexOf('Submission date');
         const locationIdx = headers.indexOf('Location');
         const languageIdx = headers.indexOf('Languages');
 
+        // Extract leads data
         leadsData = lines.slice(1).map(line => {
           const fields = line.split(',');
           return {
-            date: new Date(fields[dateIdx]?.trim()),
+            date: new Date(fields[dateIdx]?.trim()), // Convert to Date object
             location: fields[locationIdx]?.trim(),
-            language: fields[languageIdx]?.split(',')[0]?.trim().replace(/["']/g, "").trim()
+            language: fields[languageIdx]?.split(',')[0]?.trim().replace(/["']/g, "").trim() // Clean language
           };
         });
 
-        console.log("Leads Data Parsed:", leadsData);
+        console.log("Leads Data Parsed:", leadsData); // Log for debugging
       };
       
       reader.readAsText(file);
@@ -182,8 +184,8 @@
       const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
       const languageSummaryTable = document.getElementById('languageSummaryTable').getElementsByTagName('tbody')[0];
 
-      summaryTable.innerHTML = ''; // Clear previous results
-      languageSummaryTable.innerHTML = ''; // Clear previous results
+      summaryTable.innerHTML = ''; // Clear old results
+      languageSummaryTable.innerHTML = ''; // Clear old results
 
       document.getElementById('startDate').textContent = startDateValue;
       document.getElementById('endDate').textContent = endDateValue;
@@ -196,11 +198,11 @@
       const startDate = new Date(startDateValue);
       const endDate = new Date(endDateValue);
       startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
+      endDate.setHours(23, 59, 59, 999); // Include full day
 
+      // Filter the leads for the selected date range
       const leadsForSelectedRange = leadsData.filter(lead => {
         const leadDate = new Date(lead.date);
-        leadDate.setHours(0, 0, 0, 0);
         return leadDate >= startDate && leadDate <= endDate;
       });
       const totalLeadsCount = leadsForSelectedRange.length;
@@ -209,18 +211,17 @@
       const locationCount = {};
       const cityLanguageCount = {};
 
+      // Count leads by location and language per city
       leadsForSelectedRange.forEach(lead => {
         locationCount[lead.location] = (locationCount[lead.location] || 0) + 1;
 
         if (!cityLanguageCount[lead.location]) {
           cityLanguageCount[lead.location] = {};
         }
-        if (!cityLanguageCount[lead.location][lead.language]) {
-          cityLanguageCount[lead.location][lead.language] = 0;
-        }
-        cityLanguageCount[lead.location][lead.language] += 1;
+        cityLanguageCount[lead.location][lead.language] = (cityLanguageCount[lead.location][lead.language] || 0) + 1;
       });
 
+      // Populate location summary table
       for (let location in locationCount) {
         const row = summaryTable.insertRow();
         const cell1 = row.insertCell(0);
@@ -229,6 +230,7 @@
         cell2.textContent = locationCount[location];
       }
 
+      // Populate language summary table
       for (let city in cityLanguageCount) {
         for (let language in cityLanguageCount[city]) {
           const row = languageSummaryTable.insertRow();
@@ -241,130 +243,128 @@
 
       updateLocationChart(locationCount);
       updateLanguageChart(cityLanguageCount);
-
-      resultsDiv.style.display = 'block';
+      resultsDiv.style.display = 'block'; // Show the results section
     }
+
     function updateLocationChart(locationCount) {
       const locationLabels = Object.keys(locationCount);
       const locationData = Object.values(locationCount);
 
-      if (locationChart)
-      locationChart.destroy();
-    }
+      if (locationChart) {
+        locationChart.destroy();
+      }
 
-    const ctx1 = document.getElementById('locationChart').getContext('2d');
-    locationChart = new Chart(ctx1, {
-      type: 'bar',
-      data: {
-        labels: locationLabels,
-        datasets: [{
-          label: 'Leads by Location',
-          data: locationData,
-          backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green
-          hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter green
-          borderColor: 'rgba(0, 255, 0, 1)', // Border green
-          borderWidth: 2,
-          barThickness: 50,
-          borderRadius: 10 // 3D-like effect
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false
-          }
+      const ctx1 = document.getElementById('locationChart').getContext('2d');
+      locationChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: locationLabels,
+          datasets: [{
+            label: 'Leads by Location',
+            data: locationData,
+            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green with some transparency
+            hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter green
+            borderColor: 'rgba(0, 255, 0, 1)', // Green border
+            borderWidth: 2,
+            barThickness: 50,
+            borderRadius: 10, // 3D-like rounded effect
+          }]
         },
-        scales: {
-          x: {
-            grid: {
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
               display: false
-            },
-            ticks: {
-              color: '#00FF00'
             }
           },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#00FF00'
+              }
             },
-            ticks: {
-              color: '#00FF00'
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
+              },
+              ticks: {
+                color: '#00FF00'
+              }
             }
           }
-        },
-        backgroundColor: 'rgba(0, 0, 0, 0.7)' // Transparent black background
-      }
-    });
-  }
-
-  function updateLanguageChart(cityLanguageCount) {
-    const cityLanguageLabels = [];
-    const cityLanguageData = [];
-
-    Object.entries(cityLanguageCount).forEach(([city, languages]) => {
-      Object.entries(languages).forEach(([language, count]) => {
-        cityLanguageLabels.push(`${city} (${language})`);
-        cityLanguageData.push(count);
+        }
       });
-    });
-
-    if (languageChart) {
-      languageChart.destroy();
     }
 
-    const ctx2 = document.getElementById('languageChart').getContext('2d');
-    languageChart = new Chart(ctx2, {
-      type: 'bar',
-      data: {
-        labels: cityLanguageLabels,
-        datasets: [{
-          label: 'Leads by Language per City',
-          data: cityLanguageData,
-          backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green
-          hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter green
-          borderColor: 'rgba(0, 255, 0, 1)', // Border green
-          borderWidth: 2,
-          barThickness: 50,
-          borderRadius: 10 // Rounded corners for 3D effect
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false
-          }
+    function updateLanguageChart(cityLanguageCount) {
+      const cityLanguageLabels = [];
+      const cityLanguageData = [];
+
+      Object.entries(cityLanguageCount).forEach(([city, languages]) => {
+        Object.entries(languages).forEach(([language, count]) => {
+          cityLanguageLabels.push(`${city} (${language})`);
+          cityLanguageData.push(count);
+        });
+      });
+
+      if (languageChart) {
+        languageChart.destroy();
+      }
+
+      const ctx2 = document.getElementById('languageChart').getContext('2d');
+      languageChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: cityLanguageLabels,
+          datasets: [{
+            label: 'Leads by Language per City',
+            data: cityLanguageData,
+            backgroundColor: 'rgba(0, 255, 0, 0.7)', // Tropical green
+            hoverBackgroundColor: 'rgba(0, 255, 0, 0.9)', // Brighter green
+            borderColor: 'rgba(0, 255, 0, 1)', // Green border
+            borderWidth: 2,
+            barThickness: 50,
+            borderRadius: 10, // Rounded corners for 3D effect
+          }]
         },
-        scales: {
-          x: {
-            grid: {
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
               display: false
-            },
-            ticks: {
-              color: '#00FF00',
-              autoSkip: false,
-              maxRotation: 45,
-              minRotation: 45
             }
           },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#00FF00',
+                autoSkip: false,
+                maxRotation: 45,
+                minRotation: 45
+              }
             },
-            ticks: {
-              color: '#00FF00'
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 255, 0, 0.3)' // Light green grid lines
+              },
+              ticks: {
+                color: '#00FF00'
+              }
             }
           }
-        },
-        backgroundColor: 'rgba(0, 0, 0, 0.7)' // Transparent black background
-      }
-    });
-  }
+        }
+      });
+    }
 
-  document.getElementById('csvFileInput').addEventListener('change', loadCSV);
+    document.getElementById('csvFileInput').addEventListener('change', loadCSV);
   </script>
 </body>
 </html>
