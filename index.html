@@ -153,10 +153,17 @@
       const startDate = new Date(startDateValue);
       const endDate = new Date(endDateValue);
 
-      // Fix: Adjust the comparison to include the end date
-      const leadsForSelectedRange = leadsData.filter(lead => 
-        lead.date >= startDate && lead.date <= endDate
-      );
+      // Normalize the dates by setting the time to 00:00:00
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999); // Include the entire end date day
+
+      // Filter the leads for the selected date range
+      const leadsForSelectedRange = leadsData.filter(lead => {
+        const leadDate = new Date(lead.date);
+        leadDate.setHours(0, 0, 0, 0); // Normalize lead date as well
+        return leadDate >= startDate && leadDate <= endDate;
+      });
+
       const totalLeadsCount = leadsForSelectedRange.length;
 
       document.getElementById('totalLeads').textContent = totalLeadsCount;
@@ -217,7 +224,7 @@
                 display: false,
               },
               ticks: {
-                                color: '#00FF00'
+                color: '#00FF00'
               }
             },
             y: {
@@ -300,4 +307,3 @@
   </script>
 </body>
 </html>
-
