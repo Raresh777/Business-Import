@@ -5,8 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSV Cleaner</title>
     <style>
+        body {
+            background-color: #000741; /* Stratos color */
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #ffffff;
+        }
         .red {
             background-color: red;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #downloadLink {
+            display: none;
+            color: #ffffff;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -14,7 +41,7 @@
     <h1>Upload CSV to Clean Names</h1>
     <input type="file" id="csvFileInput" accept=".csv" />
     <button id="processBtn">Process File</button>
-    <a id="downloadLink" style="display:none;">Download Cleaned File</a>
+    <a id="downloadLink">Download Cleaned CSV File</a>
 
     <script>
         document.getElementById('processBtn').addEventListener('click', () => {
@@ -51,16 +78,10 @@
                 const cleanedRow = [...row];
 
                 // Clean First Name
-                let cleanedFirstName = cleanText(row[firstNameIndex]);
-                if (row[firstNameIndex] !== cleanedFirstName) {
-                    cleanedRow[firstNameIndex] = cleanedFirstName + ' [*]'; // Mark as cleaned
-                }
+                cleanedRow[firstNameIndex] = cleanText(row[firstNameIndex]);
 
                 // Clean Last Name
-                let cleanedLastName = cleanText(row[lastNameIndex]);
-                if (row[lastNameIndex] !== cleanedLastName) {
-                    cleanedRow[lastNameIndex] = cleanedLastName + ' [*]'; // Mark as cleaned
-                }
+                cleanedRow[lastNameIndex] = cleanText(row[lastNameIndex]);
 
                 return cleanedRow;
             });
