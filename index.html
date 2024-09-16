@@ -3,29 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Cleaner</title>
+    <title>Vintage CSV Cleaner</title>
     <style>
         body {
-            background-color: #000741; /* Stratos background color */
-            color: white;
-            font-family: Arial, sans-serif;
+            background-color: #f4e7d3; /* Light vintage background */
+            color: #5b3427; /* Dark brown text */
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
         }
         h1 {
-            color: #ffffff;
+            font-size: 36px;
+            margin-top: 30px;
         }
-        input, button {
+        input[type="file"] {
             padding: 10px;
-            margin: 10px;
-            border: none;
+            margin: 20px;
             font-size: 16px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
+            border: 2px solid #5b3427;
+            background-color: #f9f4ef;
             cursor: pointer;
         }
+        button {
+            padding: 10px 20px;
+            margin: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #c4a484;
+            color: #ffffff;
+            border: 2px solid #5b3427;
+            cursor: pointer;
+            border-radius: 10px;
+        }
         button:hover {
-            background-color: #45a049;
+            background-color: #5b3427;
+            color: #ffffff;
         }
     </style>
 </head>
@@ -82,6 +93,7 @@
         }
 
         function cleanText(text) {
+            if (!text) return "";  // Handle any undefined or empty values
             return text.normalize('NFD').replace(/[\u0300-\u036f]/g, "") // Remove diacritics
                        .replace(/[^a-zA-Z\s]/g, ""); // Remove non-ASCII characters
         }
@@ -89,12 +101,18 @@
         function downloadCSV(csvContent) {
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
+            
+            link.href = url;
             link.download = 'cleaned_names.csv';
             
-            document.body.appendChild(link);  // Append the link to the document
-            link.click();  // Automatically trigger the download
-            document.body.removeChild(link);  // Remove the link after download
+            // Append link, trigger click, and remove it immediately after download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Release the object URL to free memory
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
