@@ -72,8 +72,10 @@
         });
 
         function processCSV(csv) {
-            const rows = csv.split("\n").map(row => row.split(","));
-            const firstRow = rows[0];
+            // Split the CSV into rows
+            const rows = csv.split("\n").filter(row => row.trim().length > 0); // Filter out empty rows
+
+            const firstRow = rows[0].split(",");
             const firstNameIndex = firstRow.indexOf("First name");
             const lastNameIndex = firstRow.indexOf("Last name");
 
@@ -82,24 +84,31 @@
                 return;
             }
 
-            const cleanedRows = rows.filter(row => row.length > 1).map((row, rowIndex) => {
-                const cleanedRow = [...row];
+            const cleanedRows = rows.map((row, rowIndex) => {
+                const rowFields = row.split(",");
+                
+                // Clean only rows that have more than one column (to avoid any extra lines being processed)
+                if (rowFields.length <= 1) {
+                    return row;  // Leave non-data lines untouched
+                }
+
+                const cleanedRow = [...rowFields];
 
                 // Clean First Name
                 if (cleanedRow[firstNameIndex]) {
-                    cleanedRow[firstNameIndex] = cleanText(row[firstNameIndex]);
+                    cleanedRow[firstNameIndex] = cleanText(cleanedRow[firstNameIndex]);
                 }
 
                 // Clean Last Name
                 if (cleanedRow[lastNameIndex]) {
-                    cleanedRow[lastNameIndex] = cleanText(row[lastNameIndex]);
+                    cleanedRow[lastNameIndex] = cleanText(cleanedRow[lastNameIndex]);
                 }
 
-                return cleanedRow;
+                return cleanedRow.join(",");
             });
 
-            // Convert cleaned data back to CSV format without changing row order
-            const cleanedCSV = cleanedRows.map(row => row.join(",")).join("\n");
+            // Convert cleaned data back to CSV format and remove any extra empty lines
+            const cleanedCSV = cleanedRows.join("\n");
             downloadCSV(cleanedCSV);
         }
 
