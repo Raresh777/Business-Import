@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Cleaner</title>
+    <title>Futuristic CSV Cleaner</title>
     <style>
         body {
-            background-image: url('https://images.unsplash.com/photo-1558225979-94f0382ab673');
+            background-color: rgba(0, 255, 0, 0.1); /* Green-transparent futuristic look */
+            background-image: url('https://images.unsplash.com/photo-1521747116042-5a810fda9664'); /* Futuristic look */
             background-size: cover;
             background-position: center;
             font-family: 'Courier New', Courier, monospace;
@@ -18,7 +19,7 @@
         h1 {
             font-size: 36px;
             margin-top: 50px;
-            color: #FFD700;
+            color: #00FF7F; /* Futuristic green color */
             text-shadow: 2px 2px 8px #000000;
         }
         .container {
@@ -32,34 +33,18 @@
             padding: 10px;
             margin: 20px;
             font-size: 16px;
-            border: 2px solid #FFD700;
+            border: 2px solid #00FF7F; /* Green futuristic border */
             background-color: #282828;
-            color: #FFD700;
+            color: #00FF7F;
             cursor: pointer;
             border-radius: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            background-color: #FFD700;
-            color: #282828;
-            border: none;
-            cursor: pointer;
-            border-radius: 10px;
-        }
-        button:hover {
-            background-color: #DAA520;
-            color: #ffffff;
         }
     </style>
 </head>
 <body>
-    <h1>CSV Cleaner</h1>
+    <h1>Futuristic CSV Cleaner</h1>
     <div class="container">
         <input type="file" id="csvFileInput" accept=".csv" />
-        <button onclick="downloadCleanedCSV()">Download Cleaned CSV</button>
     </div>
     
     <script>
@@ -76,6 +61,7 @@
             'Rabat': '+212',
             'Katowice': '+48',
             'Sofia': '+359',
+            'Constanta': '+40',
             // Add more cities and country codes here as needed
         };
 
@@ -126,7 +112,7 @@
                     cleanedRow[lastNameIndex] = cleanText(cleanedRow[lastNameIndex]);
                 }
 
-                // Format Phone Number
+                // Format Phone Number from Column F
                 if (cleanedRow[phoneNumberIndex]) {
                     cleanedRow[phoneNumberIndex] = formatPhoneNumber(cleanedRow[phoneNumberIndex], cleanedRow[locationIndex]);
                 }
@@ -174,27 +160,8 @@
             link.href = url;
             link.download = 'cleaned_names.csv';
             
-            document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
-            
             URL.revokeObjectURL(url);
-        }
-
-        function downloadCleanedCSV() {
-            const fileInput = document.getElementById('csvFileInput');
-            if (!fileInput.files.length) {
-                alert("No file uploaded!");
-                return;
-            }
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-                const csvContent = e.target.result;
-                processCSV(csvContent);
-            };
-            reader.readAsText(file);
         }
     </script>
 </body>
