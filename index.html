@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clockwork CSV Cleaner</title>
+    <title>CSV Cleaner</title>
     <style>
         body {
-            background-image: url('https://images.unsplash.com/photo-1558225979-94f0382ab673'); /* Steampunk clock image */
+            background-image: url('https://images.unsplash.com/photo-1558225979-94f0382ab673');
             background-size: cover;
             background-position: center;
             font-family: 'Courier New', Courier, monospace;
@@ -56,9 +56,10 @@
     </style>
 </head>
 <body>
-    <h1>Steampunk CSV Cleaner</h1>
+    <h1>CSV Cleaner</h1>
     <div class="container">
         <input type="file" id="csvFileInput" accept=".csv" />
+        <button onclick="downloadCSV()">Download Cleaned CSV</button>
     </div>
     
     <script>
@@ -69,6 +70,13 @@
             'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y',
             'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f',
             'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ы': 'y', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+        };
+
+        const cityCountryCodeMap = {
+            'Rabat': '+212',
+            'Katowice': '+48',
+            'Sofia': '+359',
+            // Add more cities and their respective country codes as needed
         };
 
         document.getElementById('csvFileInput').addEventListener('change', () => {
@@ -89,25 +97,21 @@
         });
 
         function processCSV(csv) {
-            // Split the CSV into rows and filter out row 2 and 3 (index 1 and 2)
             const rows = csv.split("\n").filter((row, index) => index !== 1 && index !== 2);
-
             const firstRow = rows[0].split(",");
             const firstNameIndex = firstRow.indexOf("First name");
             const lastNameIndex = firstRow.indexOf("Last name");
+            const phoneNumberIndex = firstRow.indexOf("Phone Number");
+            const locationIndex = firstRow.indexOf("Location");
 
-            if (firstNameIndex === -1 || lastNameIndex === -1) {
-                alert("First name or Last name columns not found!");
+            if (firstNameIndex === -1 || lastNameIndex === -1 || phoneNumberIndex === -1 || locationIndex === -1) {
+                alert("Missing necessary columns!");
                 return;
             }
 
             const cleanedRows = rows.map((row, rowIndex) => {
                 const rowFields = row.split(",");
-                
-                // Clean only rows that have more than one column (to avoid any extra lines being processed)
-                if (rowFields.length <= 1) {
-                    return row;  // Leave non-data lines untouched
-                }
+                if (rowFields.length <= 1) return row;  // Skip empty rows
 
                 const cleanedRow = [...rowFields];
 
@@ -121,10 +125,14 @@
                     cleanedRow[lastNameIndex] = cleanText(cleanedRow[lastNameIndex]);
                 }
 
+                // Format Phone Number
+                if (cleanedRow[phoneNumberIndex]) {
+                    cleanedRow[phoneNumberIndex] = formatPhoneNumber(cleanedRow[phoneNumberIndex], cleanedRow[locationIndex]);
+                }
+
                 return cleanedRow.join(",");
             });
 
-            // Convert cleaned data back to CSV format and remove any extra empty lines
             const cleanedCSV = cleanedRows.join("\n");
             downloadCSV(cleanedCSV);
         }
@@ -132,26 +140,17 @@
         function cleanText(text) {
             if (!text) return "x";  // Handle any undefined or empty values
             
-            // Remove diacritics but keep the base letters
-            let cleanText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-            
-            // Check for non-English characters
-            let containsNonEnglish = false;
+            let cleanText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");  // Remove diacritics
+            cleanText = cleanText.split("").map(char => cyrillicToLatinMap[char] || char).join("");  // Transliterate Cyrillic
+            return cleanText;
+        }
 
-            // Attempt to transliterate Cyrillic letters; if not possible, flag for replacement with "x"
-            cleanText = cleanText.split("").map(char => {
-                if (cyrillicToLatinMap[char]) {
-                    return cyrillicToLatinMap[char];
-                } else if (char.match(/[a-zA-Z\s]/)) {
-                    return char; // Keep English letters
-                } else {
-                    containsNonEnglish = true; // Mark for replacement
-                    return "";
-                }
-            }).join("");
-
-            // If any non-English characters were found, replace the entire text with "x"
-            return containsNonEnglish ? "x" : cleanText;
+        function formatPhoneNumber(phoneNumber, location) {
+            const countryCode = cityCountryCodeMap[location] || '';
+            if (!phoneNumber.startsWith('+')) {
+                phoneNumber = `${countryCode}${phoneNumber.lstrip('0')}`;
+            }
+            return phoneNumber;
         }
 
         function downloadCSV(csvContent) {
@@ -162,12 +161,10 @@
             link.href = url;
             link.download = 'cleaned_names.csv';
             
-            // Append link, trigger click, and remove it immediately after download
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            // Release the object URL to free memory
             URL.revokeObjectURL(url);
         }
     </script>
