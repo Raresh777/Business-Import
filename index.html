@@ -100,7 +100,6 @@
             const rows = csv.split("\n");
             const header = rows[0].split(",");
 
-            // Identify column indices
             const firstNameIndex = header.indexOf("First name");
             const lastNameIndex = header.indexOf("Last name");
             const phoneNumberIndex = header.indexOf("Phone Number");
@@ -147,6 +146,12 @@
 
             // Transliterate Cyrillic letters
             cleanedText = cleanedText.split("").map(char => cyrillicToLatinMap[char] || char).join("");
+
+            // If non-English characters remain, replace the name with "x"
+            const nonLatinRegex = /[^\u0000-\u007f]/;
+            if (nonLatinRegex.test(cleanedText)) {
+                return "x";
+            }
             return cleanedText;
         }
 
