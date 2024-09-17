@@ -76,7 +76,6 @@
             'Rabat': '+212',
             'Katowice': '+48',
             'Sofia': '+359',
-            // Add more cities and their respective country codes as needed
         };
 
         document.getElementById('csvFileInput').addEventListener('change', () => {
@@ -97,7 +96,7 @@
         });
 
         function processCSV(csv) {
-            const rows = csv.split("\n").filter((row, index) => index !== 1 && index !== 2);
+            const rows = csv.split("\n");
             const firstRow = rows[0].split(",");
             const firstNameIndex = firstRow.indexOf("First name");
             const lastNameIndex = firstRow.indexOf("Last name");
@@ -148,7 +147,7 @@
         function formatPhoneNumber(phoneNumber, location) {
             const countryCode = cityCountryCodeMap[location] || '';
             if (!phoneNumber.startsWith('+')) {
-                phoneNumber = `${countryCode}${phoneNumber.lstrip('0')}`;
+                phoneNumber = `${countryCode}${phoneNumber.replace(/^0+/, '')}`;
             }
             return phoneNumber;
         }
