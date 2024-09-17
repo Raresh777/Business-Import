@@ -139,13 +139,17 @@
         function cleanText(text) {
             if (!text) return "x";  // Handle any undefined or empty values
             
-            let cleanText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");  // Remove diacritics
-            cleanText = cleanText.split("").map(char => cyrillicToLatinMap[char] || char).join("");  // Transliterate Cyrillic
+            // Remove diacritics but keep the base letters
+            let cleanText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+            
+            // Transliterate Cyrillic letters
+            cleanText = cleanText.split("").map(char => cyrillicToLatinMap[char] || char).join("");
             return cleanText;
         }
 
         function formatPhoneNumber(phoneNumber, location) {
             const countryCode = cityCountryCodeMap[location] || '';
+            // Ensure the phone number starts with + and the correct country code
             if (!phoneNumber.startsWith('+')) {
                 phoneNumber = `${countryCode}${phoneNumber.replace(/^0+/, '')}`;
             }
