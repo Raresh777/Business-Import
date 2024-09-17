@@ -59,7 +59,7 @@
     <h1>CSV Cleaner</h1>
     <div class="container">
         <input type="file" id="csvFileInput" accept=".csv" />
-        <button onclick="downloadCSV()">Download Cleaned CSV</button>
+        <button onclick="downloadCleanedCSV()">Download Cleaned CSV</button>
     </div>
     
     <script>
@@ -76,6 +76,7 @@
             'Rabat': '+212',
             'Katowice': '+48',
             'Sofia': '+359',
+            // Add more cities and country codes here as needed
         };
 
         document.getElementById('csvFileInput').addEventListener('change', () => {
@@ -97,11 +98,13 @@
 
         function processCSV(csv) {
             const rows = csv.split("\n");
-            const firstRow = rows[0].split(",");
-            const firstNameIndex = firstRow.indexOf("First name");
-            const lastNameIndex = firstRow.indexOf("Last name");
-            const phoneNumberIndex = firstRow.indexOf("Phone Number");
-            const locationIndex = firstRow.indexOf("Location");
+            const header = rows[0].split(",");
+
+            // Identify column indices
+            const firstNameIndex = header.indexOf("First name");
+            const lastNameIndex = header.indexOf("Last name");
+            const phoneNumberIndex = header.indexOf("Phone Number");
+            const locationIndex = header.indexOf("Location");
 
             if (firstNameIndex === -1 || lastNameIndex === -1 || phoneNumberIndex === -1 || locationIndex === -1) {
                 alert("Missing necessary columns!");
@@ -137,22 +140,24 @@
         }
 
         function cleanText(text) {
-            if (!text) return "x";  // Handle any undefined or empty values
-            
-            // Remove diacritics but keep the base letters
-            let cleanText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-            
+            if (!text) return "x";  // Handle undefined or empty values
+
+            // Remove diacritics
+            let cleanedText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+
             // Transliterate Cyrillic letters
-            cleanText = cleanText.split("").map(char => cyrillicToLatinMap[char] || char).join("");
-            return cleanText;
+            cleanedText = cleanedText.split("").map(char => cyrillicToLatinMap[char] || char).join("");
+            return cleanedText;
         }
 
         function formatPhoneNumber(phoneNumber, location) {
-            const countryCode = cityCountryCodeMap[location] || '';
-            // Ensure the phone number starts with + and the correct country code
+            const countryCode = cityCountryCodeMap[location.trim()] || '';  // Get the country code based on the city
+
+            // Ensure the phone number starts with a '+' and correct country code
             if (!phoneNumber.startsWith('+')) {
                 phoneNumber = `${countryCode}${phoneNumber.replace(/^0+/, '')}`;
             }
+
             return phoneNumber;
         }
 
@@ -169,6 +174,22 @@
             document.body.removeChild(link);
             
             URL.revokeObjectURL(url);
+        }
+
+        function downloadCleanedCSV() {
+            const fileInput = document.getElementById('csvFileInput');
+            if (!fileInput.files.length) {
+                alert("No file uploaded!");
+                return;
+            }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const csvContent = e.target.result;
+                processCSV(csvContent);
+            };
+            reader.readAsText(file);
         }
     </script>
 </body>
