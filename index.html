@@ -74,8 +74,8 @@
             'Rabat': '+212',
             'Katowice': '+48',
             'Sofia': '+359',
-            'Constanta': '+40',  // Example code for Romania
-            // Add more cities and country codes as needed
+            'Constanta': '+40',  // Romania
+            // Add more cities and country codes here
         };
 
         document.getElementById('csvFileInput').addEventListener('change', () => {
@@ -125,7 +125,7 @@
                     cleanedRow[lastNameIndex] = cleanText(cleanedRow[lastNameIndex]);
                 }
 
-                // Format Phone Number from Column F
+                // Format Phone Number based on the location (Column G)
                 if (cleanedRow[phoneNumberIndex]) {
                     cleanedRow[phoneNumberIndex] = formatPhoneNumber(cleanedRow[phoneNumberIndex], cleanedRow[locationIndex]);
                 }
@@ -157,10 +157,10 @@
         function formatPhoneNumber(phoneNumber, location) {
             const countryCode = cityCountryCodeMap[location.trim()] || '';  // Get the country code based on the city
 
-            // Remove any leading single quote
-            phoneNumber = phoneNumber.replace(/^'/, '');
+            // Remove any leading single quote or spaces
+            phoneNumber = phoneNumber.replace(/^'|\s/g, '');
 
-            // Ensure the phone number starts with a '+' and correct country code
+            // Ensure the phone number starts with a '+' and the correct country code
             if (!phoneNumber.startsWith('+')) {
                 phoneNumber = `${countryCode}${phoneNumber.replace(/^0+/, '')}`;
             }
