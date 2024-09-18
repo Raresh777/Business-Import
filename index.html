@@ -6,7 +6,7 @@
     <title>CSV Formatter</title>
     <style>
         body {
-            background-color: rgba(0, 0, 0, 0.8); /* 80% transparency for black background */
+            background-color: rgba(128, 0, 128, 0.6); /* 60% transparency purple background */
             background-size: cover;
             background-position: center;
             font-family: 'Courier New', Courier, monospace;
@@ -32,7 +32,7 @@
             margin: 20px;
             font-size: 16px;
             border: 2px solid #00FF7F;
-            background-color: rgba(0, 255, 127, 0.6); /* 60% transparency green */
+            background-color: rgba(0, 255, 127, 0.4); /* 40% transparency green */
             color: #00FF7F;
             cursor: pointer;
             border-radius: 10px;
@@ -74,8 +74,10 @@
             'Rabat': '+212',
             'Katowice': '+48',
             'Sofia': '+359',
-            'Constanta': '+40',  // Romania
-            // Add more cities and country codes here
+            'Constanta': '+40',
+            'Bucharest': '+40',
+            'Cluj': '+40',
+            // Add more cities and country codes here as needed
         };
 
         document.getElementById('csvFileInput').addEventListener('change', () => {
@@ -127,7 +129,9 @@
 
                 // Format Phone Number based on the location (Column G)
                 if (cleanedRow[phoneNumberIndex]) {
+                    console.log(`Before Formatting: ${cleanedRow[phoneNumberIndex]}`);
                     cleanedRow[phoneNumberIndex] = formatPhoneNumber(cleanedRow[phoneNumberIndex], cleanedRow[locationIndex]);
+                    console.log(`After Formatting: ${cleanedRow[phoneNumberIndex]}`);
                 }
 
                 return cleanedRow.join(",");
@@ -156,6 +160,11 @@
 
         function formatPhoneNumber(phoneNumber, location) {
             const countryCode = cityCountryCodeMap[location.trim()] || '';  // Get the country code based on the city
+
+            if (!countryCode) {
+                console.error(`No country code found for location: ${location}`);
+                return phoneNumber;  // No formatting if no valid country code
+            }
 
             // Remove any leading single quote or spaces
             phoneNumber = phoneNumber.replace(/^'|\s/g, '');
