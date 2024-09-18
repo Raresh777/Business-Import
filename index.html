@@ -6,7 +6,7 @@
     <title>Recturare CSV Formatter</title>
     <style>
         body {
-            background-color: rgba(0, 255, 0, 0.2); /* Futuristic transparent green background */
+            background: linear-gradient(120deg, #7D00FF, #330066); /* Purple gradient background */
             background-size: cover;
             background-position: center;
             font-family: 'Courier New', Courier, monospace;
@@ -47,6 +47,7 @@
             font-size: 16px;
             cursor: pointer;
             border: none;
+            box-shadow: 0 5px 20px rgba(125, 0, 255, 0.7);
         }
         input[type="file"]::file-selector-button:hover {
             background-color: rgba(0, 255, 127, 0.7);
@@ -59,9 +60,8 @@
     <div class="container">
         <input type="file" id="csvFileInput" accept=".csv" />
     </div>
-    
     <script>
-        // Correct City-to-Country Code mapping
+        // City-to-Country Code mapping
         const cityCountryCodeMap = {
             'Rabat': '+212',
             'Katowice': '+48',
@@ -100,7 +100,6 @@
             reader.readAsText(file);
         });
 
-        // Function to process the CSV
         function processCSV(csv) {
             const rows = csv.split("\n");
             const header = rows[0].split(",");
@@ -121,17 +120,14 @@
 
                 const cleanedRow = [...rowFields];
 
-                // Clean First Name
                 if (cleanedRow[firstNameIndex]) {
                     cleanedRow[firstNameIndex] = cleanText(cleanedRow[firstNameIndex]);
                 }
 
-                // Clean Last Name
                 if (cleanedRow[lastNameIndex]) {
                     cleanedRow[lastNameIndex] = cleanText(cleanedRow[lastNameIndex]);
                 }
 
-                // Format Phone Number from Column F
                 if (cleanedRow[phoneNumberIndex]) {
                     cleanedRow[phoneNumberIndex] = formatPhoneNumber(cleanedRow[phoneNumberIndex], cleanedRow[locationIndex]);
                 }
@@ -143,51 +139,33 @@
             downloadCSV(cleanedCSV);
         }
 
-        // Function to clean the names
         function cleanText(text) {
-            if (!text) return "x";  // Handle undefined or empty values
-
-            // Remove diacritics
+            if (!text) return "x";  
             let cleanedText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-
-            // Transliterate Cyrillic letters
             cleanedText = cleanedText.split("").map(char => cyrillicToLatinMap[char] || char).join("");
-
-            // If non-English characters remain, replace the name with "x"
             const nonLatinRegex = /[^\u0000-\u007f]/;
             if (nonLatinRegex.test(cleanedText)) {
                 return "x";
             }
-
-            // Return the cleaned text (without spaces or invalid characters)
             return cleanedText.trim();
         }
 
-        // Function to format the phone number
         function formatPhoneNumber(phoneNumber, location) {
-            const countryCode = cityCountryCodeMap[location.trim()] || '';  // Get the country code based on the city
-
-            // Ensure the phone number starts with a '+' and the correct country code
+            const countryCode = cityCountryCodeMap[location.trim()] || '';
             if (!phoneNumber.startsWith('+')) {
                 phoneNumber = `${countryCode}${phoneNumber.replace(/^0+/, '')}`;
             }
-
-            // Return the formatted number
-            return `'${phoneNumber}`;  // Ensure the phone number is treated as text
+            return `'${phoneNumber}`;  
         }
 
-        // Function to download the cleaned CSV
         function downloadCSV(csvContent) {
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
-            
             link.href = url;
             link.download = 'cleaned_names.csv';
-            
             link.click();
-            URL.revoke &#8203;:contentReference[oaicite:0]{index=0}&#8203;
-URL.revokeObjectURL(url);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
