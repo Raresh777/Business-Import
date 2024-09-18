@@ -23,7 +23,6 @@
             text-shadow: 2px 2px 8px #000000;
         }
         .container {
-            background-color: rgba(0, 0, 0, 0.7);
             padding: 20px;
             display: inline-block;
             border-radius: 10px;
@@ -159,13 +158,15 @@
         function formatPhoneNumber(phoneNumber, location) {
             const countryCode = cityCountryCodeMap[location.trim()] || '';  // Get the country code based on the city
 
+            // Remove any leading single quote
+            phoneNumber = phoneNumber.replace(/^'/, '');
+
             // Ensure the phone number starts with a '+' and correct country code
             if (!phoneNumber.startsWith('+')) {
                 phoneNumber = `${countryCode}${phoneNumber.replace(/^0+/, '')}`;
             }
 
-            // Ensure the phone number is treated as text by appending an empty string
-            return `'${phoneNumber}`;
+            return `'${phoneNumber}`;  // Return the formatted number as text
         }
 
         function downloadCSV(csvContent) {
