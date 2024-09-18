@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Batman CSV Cleaner</title>
+    <title>Recturare CSV Formatter</title>
     <style>
         body {
-            background-color: rgba(0, 0, 0, 0.95); /* Dark background for Batman theme */
+            background: linear-gradient(120deg, #00FF00, #003300); /* Green gradient for futuristic look */
             background-size: cover;
             background-position: center;
             font-family: 'Courier New', Courier, monospace;
-            color: #FFD700; /* Yellow Batman style */
+            color: #ffffff;
             text-align: center;
             margin: 0;
             padding: 0;
@@ -18,44 +18,47 @@
         h1 {
             font-size: 36px;
             margin-top: 50px;
-            color: #FFD700; /* Yellow futuristic Batman color */
-            text-shadow: 2px 2px 8px #000000;
+            color: #00FF00; /* Bright Green for the header */
+            text-shadow: 2px 2px 8px #330066; /* Soft glowing purple shadow */
         }
         .container {
-            background-color: rgba(0, 0, 0, 0.7); /* Dark translucent background */
+            background-color: rgba(0, 0, 0, 0.5); /* Slightly transparent black container */
             padding: 20px;
             display: inline-block;
             border-radius: 10px;
             margin-top: 50px;
+            box-shadow: 0 4px 20px rgba(0, 255, 0, 0.5); /* Glowing green shadow */
         }
         input[type="file"] {
             padding: 10px;
             margin: 20px;
             font-size: 16px;
-            border: 2px solid #FFD700; /* Batman yellow border */
-            background-color: #282828; /* Dark background */
-            color: #FFD700;
+            border: 2px solid #7D00FF; /* Purple futuristic border */
+            background: linear-gradient(120deg, #330066, #7D00FF); /* Purple gradient for input background */
+            color: #ffffff;
             cursor: pointer;
             border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(125, 0, 255, 0.5); /* Glowing purple shadow */
         }
         input[type="file"]::file-selector-button {
-            background-color: #FFD700;
-            color: #000;
+            background-color: #7D00FF;
+            color: #fff;
             padding: 10px;
             border-radius: 20px;
             font-size: 16px;
             cursor: pointer;
             border: none;
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4); /* Batman yellow glow */
+            box-shadow: 0 5px 20px rgba(125, 0, 255, 0.7); /* Stronger glowing purple */
         }
         input[type="file"]::file-selector-button:hover {
-            background-color: #FFA500;
+            background: linear-gradient(120deg, #003300, #00FF00); /* Green glow effect */
             color: #fff;
+            box-shadow: 0 5px 25px rgba(0, 255, 0, 0.6); /* Glowing green shadow */
         }
     </style>
 </head>
 <body>
-    <h1>Batman CSV Cleaner</h1>
+    <h1>Recturare CSV Formatter</h1>
     <div class="container">
         <input type="file" id="csvFileInput" accept=".csv" />
     </div>
