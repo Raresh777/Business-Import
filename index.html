@@ -65,14 +65,12 @@
         const cityCountryCodeMap = {
             'Rabat': '+212',
             'Katowice': '+48',
-            'Sofia': '+359',
-            'Constanta': '+40',
-            'Bucharest': '+40',
-            'Cluj': '+40',
-            'Chisinau': '+373',
             'Brasov': '+40',
-            'Iasi': '+40',  // Fixed the country code for Iasi to +40
+            'Iasi': '+40',
+            'Chisinau': '+373',
             'Ploiesti': '+40',
+            'Constanta': '+40',
+            'Sofia': '+359',
             'Plovdiv': '+359',
         };
 
@@ -188,7 +186,8 @@
             link.download = 'cleaned_names.csv';
             
             link.click();
-            URL.revokeObjectURL(url);
+            URL.revoke &#8203;:contentReference[oaicite:0]{index=0}&#8203;
+URL.revokeObjectURL(url);
         }
     </script>
 </body>
