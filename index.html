@@ -6,7 +6,7 @@
     <title>CSV Formatter</title>
     <style>
         body {
-            background-color: rgba(128, 0, 128, 0.6); /* 60% transparency purple background */
+            background-color: rgba(128, 128, 128, 0.9); /* 90% transparency gray background */
             background-size: cover;
             background-position: center;
             font-family: 'Courier New', Courier, monospace;
@@ -61,15 +61,6 @@
     </div>
     
     <script>
-        const cyrillicToLatinMap = {
-            'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'E', 'Ж': 'Zh', 'З': 'Z', 'И': 'I', 'Й': 'Y',
-            'К': 'K', 'Л': 'L', 'М': 'M', 'Н': 'N', 'О': 'O', 'П': 'P', 'Р': 'R', 'С': 'S', 'Т': 'T', 'У': 'U', 'Ф': 'F',
-            'Х': 'Kh', 'Ц': 'Ts', 'Ч': 'Ch', 'Ш': 'Sh', 'Щ': 'Shch', 'Ы': 'Y', 'Э': 'E', 'Ю': 'Yu', 'Я': 'Ya',
-            'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y',
-            'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f',
-            'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ы': 'y', 'э': 'e', 'ю': 'yu', 'я': 'ya'
-        };
-
         const cityCountryCodeMap = {
             'Rabat': '+212',
             'Katowice': '+48',
@@ -119,19 +110,17 @@
 
                 // Clean First Name
                 if (cleanedRow[firstNameIndex]) {
-                    cleanedRow[firstNameIndex] = cleanText(cleanedRow[firstNameIndex]);
+                    cleanedRow[firstNameIndex] = cleanedRow[firstNameIndex].trim();
                 }
 
                 // Clean Last Name
                 if (cleanedRow[lastNameIndex]) {
-                    cleanedRow[lastNameIndex] = cleanText(cleanedRow[lastNameIndex]);
+                    cleanedRow[lastNameIndex] = cleanedRow[lastNameIndex].trim();
                 }
 
                 // Format Phone Number based on the location (Column G)
                 if (cleanedRow[phoneNumberIndex]) {
-                    console.log(`Before Formatting: ${cleanedRow[phoneNumberIndex]}`);
                     cleanedRow[phoneNumberIndex] = formatPhoneNumber(cleanedRow[phoneNumberIndex], cleanedRow[locationIndex]);
-                    console.log(`After Formatting: ${cleanedRow[phoneNumberIndex]}`);
                 }
 
                 return cleanedRow.join(",");
@@ -139,23 +128,6 @@
 
             const cleanedCSV = cleanedRows.join("\n");
             downloadCSV(cleanedCSV);
-        }
-
-        function cleanText(text) {
-            if (!text) return "x";  // Handle undefined or empty values
-
-            // Remove diacritics
-            let cleanedText = text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
-
-            // Transliterate Cyrillic letters
-            cleanedText = cleanedText.split("").map(char => cyrillicToLatinMap[char] || char).join("");
-
-            // If non-English characters remain, replace the name with "x"
-            const nonLatinRegex = /[^\u0000-\u007f]/;
-            if (nonLatinRegex.test(cleanedText)) {
-                return "x";
-            }
-            return cleanedText;
         }
 
         function formatPhoneNumber(phoneNumber, location) {
@@ -166,15 +138,12 @@
                 return phoneNumber;  // No formatting if no valid country code
             }
 
-            // Remove any leading single quote or spaces
-            phoneNumber = phoneNumber.replace(/^'|\s/g, '');
-
             // Ensure the phone number starts with a '+' and the correct country code
-            if (!phoneNumber.startsWith('+')) {
+            if (!phoneNumber.startsWith('+') && !phoneNumber.startsWith(countryCode)) {
                 phoneNumber = `${countryCode}${phoneNumber.replace(/^0+/, '')}`;
             }
 
-            return `'${phoneNumber}`;  // Return the formatted number as text
+            return phoneNumber;  // Return the formatted number
         }
 
         function downloadCSV(csvContent) {
